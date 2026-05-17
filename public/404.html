@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <title>…</title>
+    <script>
+      (function () {
+        var p = location.pathname;
+        if (p === "/ppl" || p === "/ppl/404.html") {
+          location.replace("/ppl/" + location.search + location.hash);
+          return;
+        }
+        if (
+          p.indexOf("/ppl/") === 0 &&
+          !p.endsWith("/") &&
+          p.indexOf(".", p.lastIndexOf("/") + 1) === -1
+        ) {
+          location.replace(p + "/" + location.search + location.hash);
+        }
+      })();
+    </script>
+  </head>
+  <body></body>
+</html>

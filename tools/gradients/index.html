@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Градиенты для цветного текста в стиле Minecraft / ItemEdit — коды цвета и команды /ie"
+    />
+    <title>Gradients · PepoHUI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
+    <link rel="stylesheet" href="/src/styles/main.css" />
+    <script>
+      (function () {
+        try {
+          if (sessionStorage.getItem("ppl:welcome-done") === "1") {
+            document.documentElement.classList.add("ppl-skip-welcome");
+          }
+        } catch (_) {}
+      })();
+    </script>
+  </head>
+  <body class="is-loading">
+    <div id="page-loader" class="page-loader" aria-busy="true" aria-live="polite">
+      <div class="page-loader__grid" aria-hidden="true"></div>
+      <div class="page-loader__frame" aria-hidden="true">
+        <span></span><span></span><span></span><span></span>
+      </div>
+      <div class="page-loader__inner">
+        <div class="page-loader__mark">◆</div>
+        <div class="page-loader__brand">PepoHUI</div>
+        <div class="page-loader__line" aria-hidden="true"></div>
+        <div class="page-loader__sub">ppl</div>
+      </div>
+    </div>
+    <div class="noise" aria-hidden="true"></div>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="logo" href="../../">
+          <span class="logo__mark">◆</span>
+          <span class="logo__text">PepoHUI</span>
+        </a>
+        <a class="header-repo-link" href="https://github.com/PepoHUI/ppl" target="_blank" rel="noopener noreferrer">
+          <span class="header-repo-link__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M12 .5a12 12 0 0 0-3.79 23.39c.6.11.82-.26.82-.58v-2.02c-3.34.73-4.04-1.61-4.04-1.61-.55-1.38-1.33-1.75-1.33-1.75-1.09-.74.08-.73.08-.73 1.2.08 1.83 1.24 1.83 1.24 1.07 1.83 2.81 1.3 3.49.99.11-.78.42-1.3.76-1.6-2.67-.31-5.48-1.34-5.48-5.95 0-1.31.47-2.38 1.23-3.22-.12-.31-.53-1.55.12-3.23 0 0 1.01-.32 3.3 1.23a11.4 11.4 0 0 1 6.01 0c2.29-1.55 3.29-1.23 3.29-1.23.66 1.68.25 2.92.13 3.23.76.84 1.22 1.91 1.22 3.22 0 4.62-2.82 5.64-5.5 5.94.43.38.82 1.13.82 2.27v3.37c0 .32.21.7.83.58A12 12 0 0 0 12 .5Z"
+              />
+            </svg>
+          </span>
+          <span class="header-repo-link__text">pepohui/ppl</span>
+        </a>
+        <a class="badge badge--faq" href="../../faq/">
+          <span class="badge-faq__shine" aria-hidden="true"></span>
+          <span class="badge-faq__body">
+            <span class="badge-faq__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.75" />
+                <path
+                  d="M9.75 9.75a2.25 2.25 0 0 1 3.82 1.59c0 1.2-.6 1.76-1.1 2.23-.33.3-.55.57-.55 1.06V15"
+                  stroke="currentColor"
+                  stroke-width="1.75"
+                  stroke-linecap="round"
+                />
+                <path d="M12 17.25v.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              </svg>
+            </span>
+            <span class="badge-faq__label">FAQ</span>
+          </span>
+        </a>
+      </div>
+    </header>
+
+    <article class="tool-page gradients-page">
+      <a class="back-link" href="../../">← На главную</a>
+      <h1 class="tool-page__title">Gradients</h1>
+      <p class="tool-page__intro">
+        Цветной текст для предметов: коды вида <code class="legal-doc__mono">&amp;#RRGGBB</code> с модификаторами
+        <code class="legal-doc__mono">&amp;l</code> и т.д., опционально обёртка в команды <code class="legal-doc__mono">/ie lore add</code> или
+        <code class="legal-doc__mono">/ie rename</code>. Всё считается в браузере.
+      </p>
+
+      <div class="gradients-layout">
+        <div class="panel gradients-panel gradients-panel--settings">
+          <section class="gradients-section" aria-labelledby="grad-sec-step">
+            <h2 id="grad-sec-step" class="gradients-section__title">Шаг и палитра</h2>
+            <p class="gradients-section__lead">
+              Сначала задаётся, как текст делится на блоки и сколько цветов в градиенте — затем настраиваются сами цвета ниже.
+            </p>
+            <div class="gradients-params-grid">
+              <label class="field-label gradients-params-grid__label" for="grad-chars">Символов на один цвет</label>
+              <label class="field-label gradients-params-grid__label" for="grad-color-count">Цветов в градиенте</label>
+              <p class="gradients-hint gradients-params-grid__hint">
+                Подряд идущие символы окрашиваются одним кодом <code class="legal-doc__mono">&amp;#RRGGBB</code>.
+              </p>
+              <p class="gradients-hint gradients-params-grid__hint">
+                От 2 до 8. Каждому цвету соответствует точка на полосе в центральной колонке.
+              </p>
+              <div class="gradients-stepper">
+                <button type="button" class="btn gradients-stepper__btn" id="grad-chars-minus" aria-label="Меньше">−</button>
+                <input type="number" id="grad-chars" class="gradients-stepper__input" min="1" value="1" />
+                <button type="button" class="btn gradients-stepper__btn" id="grad-chars-plus" aria-label="Больше">+</button>
+              </div>
+              <div class="gradients-stepper">
+                <button type="button" class="btn gradients-stepper__btn" id="grad-colors-minus" aria-label="Меньше цветов">−</button>
+                <input type="number" id="grad-color-count" class="gradients-stepper__input" min="2" max="8" value="2" />
+                <button type="button" class="btn gradients-stepper__btn" id="grad-colors-plus" aria-label="Больше цветов">+</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="gradients-section" aria-labelledby="grad-sec-colors">
+            <div class="gradients-section__head">
+              <h2 id="grad-sec-colors" class="gradients-section__title">Точки градиента</h2>
+              <button type="button" class="btn btn--compact" id="grad-random">Рандом</button>
+            </div>
+            <p class="gradients-hint gradients-hint--tight">
+              Клик по квадрату — палитра. HEX можно править вручную. Удерживайте Ctrl — вместо HEX появится «Скопировать»; Shift — «Рандом» только для этой точки.
+            </p>
+            <div id="grad-colors" class="gradients-colors"></div>
+          </section>
+
+          <section class="gradients-section" aria-labelledby="grad-sec-behave">
+            <h2 id="grad-sec-behave" class="gradients-section__title">Как строится градиент</h2>
+            <label class="gradients-check">
+              <input type="checkbox" id="grad-even" />
+              <span><strong>Равномерно</strong> — цвета по всей длине текста, полоса позиций отключена.</span>
+            </label>
+            <label class="gradients-check">
+              <input type="checkbox" id="grad-trim-spaces" checked />
+              <span><strong>Без пробелов в коде</strong> — пробел в тексте не вставляет «разрыв» между кодом цвета и буквой.</span>
+            </label>
+          </section>
+
+          <section class="gradients-section" aria-labelledby="grad-sec-format">
+            <h2 id="grad-sec-format" class="gradients-section__title">Модификаторы Minecraft</h2>
+            <p class="gradients-hint gradients-hint--tight">Добавляются в строку результата перед каждым символом (как в игре).</p>
+            <div class="gradients-format-grid">
+              <label class="gradients-check"><input type="checkbox" id="grad-bold" /> <span>Жирный <code>&amp;l</code></span></label>
+              <label class="gradients-check"><input type="checkbox" id="grad-italic" /> <span>Курсив <code>&amp;o</code></span></label>
+              <label class="gradients-check"><input type="checkbox" id="grad-underline" /> <span>Подчёркнутый <code>&amp;n</code></span></label>
+              <label class="gradients-check"><input type="checkbox" id="grad-strike" /> <span>Зачёркнутый <code>&amp;m</code></span></label>
+              <label class="gradients-check gradients-format-grid__full"><input type="checkbox" id="grad-obf" /> <span>Обфускация <code>&amp;k</code></span></label>
+            </div>
+          </section>
+
+          <div class="gradients-vanilla-trigger">
+            <button type="button" class="btn" id="grad-vanilla-colors-open">Ванильные цвета</button>
+          </div>
+        </div>
+
+        <div class="panel gradients-panel">
+          <label class="field-label" for="grad-text">Ваш текст</label>
+          <textarea id="grad-text" rows="4" spellcheck="false" placeholder="Введите текст…"></textarea>
+          <span class="field-label">Позиции цветов</span>
+          <div id="grad-slider" class="gradient-slider" aria-hidden="false"></div>
+          <span class="field-label">Предпросмотр</span>
+          <div id="grad-preview" class="gradients-preview"></div>
+        </div>
+
+        <div class="panel gradients-panel">
+          <span class="field-label">Вывод</span>
+          <label class="gradients-field__label" for="grad-output-mode">Режим</label>
+          <select id="grad-output-mode" class="gradients-select">
+            <option value="plain">Только текст</option>
+            <option value="lore">/ie lore add</option>
+            <option value="rename">/ie rename</option>
+          </select>
+          <div class="row">
+            <button type="button" class="btn" id="grad-copy">Скопировать</button>
+          </div>
+          <label class="field-label" for="grad-result">Результат</label>
+          <textarea id="grad-result" rows="8" readonly spellcheck="false" aria-readonly="true"></textarea>
+        </div>
+      </div>
+    </article>
+
+    <div
+      id="grad-vanilla-modal"
+      class="gradients-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="grad-vanilla-modal-title"
+      hidden
+    >
+      <div class="gradients-modal__backdrop" data-grad-vanilla-close tabindex="-1"></div>
+      <div class="gradients-modal__card gradients-modal__card--vanilla">
+        <header class="gradients-modal__header">
+          <div class="gradients-modal__header-text">
+            <p class="field-label gradients-modal__eyebrow">Справка</p>
+            <h2 id="grad-vanilla-modal-title" class="gradients-modal__title">Ванильные цвета Minecraft</h2>
+            <p class="gradients-modal__subtitle">
+              16 цветов и коды форматирования (Bold, Italic, …). В колонке Chat Code — один символ § (U+00A7) перед кодом; в
+              <code class="legal-doc__mono">server.properties</code> и чат-плагинах часто используют
+              <code class="legal-doc__mono">&amp;</code> вместо §. Колонка MOTD — экранированная форма
+              <code class="legal-doc__mono">\u00A7</code> для JSON.
+            </p>
+          </div>
+          <button type="button" class="gradients-modal__close" data-grad-vanilla-close aria-label="Закрыть">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            </svg>
+          </button>
+        </header>
+        <div class="gradients-modal__body gradients-modal__body--vanilla">
+          <div class="gradients-vanilla-table-wrap" role="region" aria-label="Таблица ванильных цветов" tabindex="0">
+            <table class="gradients-vanilla-table" id="grad-vanilla-table">
+              <thead>
+                <tr>
+                  <th scope="col">Effect</th>
+                  <th scope="col">Name</th>
+                  <th scope="col">Chat Code</th>
+                  <th scope="col">MiniMessage</th>
+                  <th scope="col">MOTD</th>
+                  <th scope="col">Hex</th>
+                </tr>
+              </thead>
+              <tbody id="grad-vanilla-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+        <footer class="gradients-modal__footer">
+          <button type="button" class="btn btn--primary" data-grad-vanilla-close>Закрыть</button>
+        </footer>
+      </div>
+    </div>
+
+    <div id="grad-color-modal" class="gradients-modal" role="dialog" aria-modal="true" aria-labelledby="grad-modal-title" hidden>
+      <div class="gradients-modal__backdrop" data-grad-modal-close tabindex="-1"></div>
+      <div class="gradients-modal__card">
+        <header class="gradients-modal__header">
+          <div class="gradients-modal__header-text">
+            <p class="field-label gradients-modal__eyebrow">Палитра</p>
+            <h2 id="grad-modal-title" class="gradients-modal__title">Точка 1</h2>
+          </div>
+          <button type="button" class="gradients-modal__close" data-grad-modal-close aria-label="Закрыть">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            </svg>
+          </button>
+        </header>
+
+        <div class="gradients-modal__body">
+          <div class="gradients-modal__spectrum">
+            <span class="field-label">Насыщенность и яркость</span>
+            <div class="gradients-modal__spectrum-inner">
+              <canvas id="grad-modal-sv" width="320" height="176" class="gradients-modal__canvas" tabindex="0" aria-label="Плоскость цвета: горизонтально насыщенность, вертикально яркость"></canvas>
+            </div>
+          </div>
+
+          <div class="gradients-modal__hue-block">
+            <label class="field-label" for="grad-modal-hue">Оттенок (Hue)</label>
+            <div class="gradients-modal__hue-row">
+              <span class="gradients-modal__hue-tick" aria-hidden="true">0°</span>
+              <input id="grad-modal-hue" type="range" min="0" max="360" value="150" class="gradients-modal__hue" />
+              <span class="gradients-modal__hue-tick" aria-hidden="true">360°</span>
+            </div>
+          </div>
+
+          <div class="gradients-modal__result">
+            <div id="grad-modal-swatch" class="gradients-modal__swatch-large" aria-hidden="true"></div>
+            <div class="gradients-modal__values">
+              <label class="field-label" for="grad-modal-hex">HEX</label>
+              <div class="gradients-modal__hex-row">
+                <input id="grad-modal-hex" type="text" maxlength="7" class="gradients-modal__hex" value="#43D388" spellcheck="false" autocomplete="off" />
+                <button type="button" class="btn btn--compact" id="grad-modal-copy-hex">Скопировать</button>
+              </div>
+              <p id="grad-modal-rgb" class="gradients-modal__rgb" aria-live="polite">RGB(0, 0, 0)</p>
+            </div>
+          </div>
+        </div>
+
+        <footer class="gradients-modal__footer">
+          <button type="button" class="btn btn--ghost" data-grad-modal-close>Отмена</button>
+          <button type="button" class="btn btn--primary" id="grad-modal-apply">Применить</button>
+        </footer>
+      </div>
+    </div>
+
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <p class="footer-legal">
+          Сайт <span class="footer-site">pepohui.github.io/ppl</span> не является официальной частью сети серверов
+          <a class="footer-link--pepeland" href="https://pepeland.net" target="_blank" rel="noopener noreferrer">PepeLand</a>.
+        </p>
+        <p class="footer-row">
+          <a href="../../privacy-policy/">Privacy Policy</a>
+          <span class="footer-sep" aria-hidden="true">·</span>
+          <span class="footer-minecraft">Not an official Minecraft product.</span>
+        </p>
+        <p class="footer-copy">
+          © PepoHUI ·
+          <a href="https://github.com/PepoHUI/ppl" target="_blank" rel="noopener noreferrer">ppl</a>
+        </p>
+      </div>
+    </footer>
+
+    <script type="module" src="/src/scripts/gradients.js"></script>
+  </body>
+</html>
