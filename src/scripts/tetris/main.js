@@ -72,15 +72,15 @@ const ROTATIONS = [
   ],
   [
     [[-1, -1], [-1, 0], [0, 0], [1, 0]],
-    [[0, -1], [1, -1], [0, 0], [0, 1]],
-    [[-1, 1], [0, 1], [1, 1], [1, 0]],
-    [[0, -1], [0, 0], [-1, 1], [0, 1]],
+    [[1, -1], [0, -1], [0, 0], [0, 1]],
+    [[-1, 0], [0, 0], [1, 0], [1, 1]],
+    [[0, -1], [0, 0], [0, 1], [-1, 1]],
   ],
   [
     [[-1, 0], [0, 0], [1, 0], [1, -1]],
     [[0, -1], [0, 0], [0, 1], [1, 1]],
     [[-1, 1], [-1, 0], [0, 0], [1, 0]],
-    [[0, -1], [0, 0], [0, 1], [-1, -1]],
+    [[-1, -1], [0, -1], [0, 0], [0, 1]],
   ],
   [
     [[0, -1], [1, -1], [0, 0], [1, 0]],
@@ -89,16 +89,16 @@ const ROTATIONS = [
     [[0, -1], [1, -1], [0, 0], [1, 0]],
   ],
   [
-    [[0, 0], [1, 0], [-1, 1], [0, 1]],
+    [[-1, 0], [0, 0], [0, -1], [1, -1]],
+    [[0, -1], [1, -1], [0, 0], [0, 1]],
+    [[-1, 0], [0, 0], [0, 1], [1, 1]],
+    [[-1, -1], [-1, 0], [0, 0], [0, -1]],
+  ],
+  [
+    [[-1, -1], [0, -1], [0, 0], [1, 0]],
     [[0, -1], [0, 0], [1, 0], [1, 1]],
-    [[1, -1], [0, -1], [1, 0], [2, 0]],
+    [[-1, 0], [0, 0], [0, 1], [1, 1]],
     [[-1, -1], [-1, 0], [0, 0], [0, 1]],
-  ],
-  [
-    [[-1, 0], [0, 0], [0, -1], [1, 0]],
-    [[0, -1], [0, 0], [1, 0], [0, 1]],
-    [[-1, 0], [0, 0], [0, 1], [1, 0]],
-    [[0, -1], [-1, 0], [0, 0], [0, 1]],
   ],
   [
     [[-1, 0], [0, 0], [1, 0], [0, -1]],
@@ -112,8 +112,8 @@ const LINE_SCORES = [0, 100, 300, 500, 800];
 
 const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 
-const canvas =  (document.getElementById("tetris-canvas"));
-const nextCanvas =  (document.getElementById("tetris-next"));
+const canvas = document.getElementById("tetris-canvas");
+const nextCanvas = document.getElementById("tetris-next");
 const overlay = document.getElementById("tetris-overlay");
 const overlayAction =  (
   document.getElementById("tetris-overlay-action")
@@ -127,8 +127,8 @@ const paletteList = document.getElementById("tetris-palette-list");
 const btnPause = document.getElementById("tetris-pause");
 const btnShuffle = document.getElementById("tetris-shuffle-blocks");
 
-const ctx = canvas.getContext("2d");
-const nextCtx = nextCanvas.getContext("2d");
+const ctx = canvas?.getContext("2d") ?? null;
+const nextCtx = nextCanvas?.getContext("2d") ?? null;
 
 let blockPool = [];
 
@@ -651,7 +651,7 @@ function startGame() {
   nextType = pullType();
   active = null;
   spawnPiece();
-  lastDrop = performance.now();
+  syncDropTimers();
   setOverlayMode("none");
   updateHud();
   animateScore(scoreEl, 0, 0);
@@ -679,7 +679,7 @@ function togglePause() {
     drawNext();
   } else {
     setOverlayMode("none");
-    lastDrop = performance.now();
+    syncDropTimers();
     if (btnPause) btnPause.textContent = "Пауза";
     startPlayingFx();
     startLoop();
@@ -758,23 +758,33 @@ function gameLoop(now) {
   drawBoard();
   drawNext();
 
-  if (isDownHeld() && now - lastSoftDrop >= SOFT_DROP_MS) {
-    lastSoftDrop = now;
-    softDrop();
-  }
+  const downHeld = isDownHeld();
 
-  tickHorizontalMove(now);
-
-  if (now - lastDrop >= dropInterval) {
-    lastDrop = now;
-    if (active) {
-      if (!collides(active, 0, 1, active.rot)) {
-        active.y++;
+  if (downHeld) {
+    if (now - lastSoftDrop >= SOFT_DROP_MS) {
+      lastSoftDrop = now;
+      softDrop();
+      lastDrop = now;
+    }
+  } else {
+    const elapsed = now - lastDrop;
+    if (elapsed >= dropInterval) {
+      if (elapsed > dropInterval * 4) {
+        lastDrop = now - dropInterval;
       } else {
-        lockPiece();
+        lastDrop = now;
+      }
+      if (active) {
+        if (!collides(active, 0, 1, active.rot)) {
+          active.y++;
+        } else {
+          lockPiece();
+        }
       }
     }
   }
+
+  tickHorizontalMove(now);
 }
 
 function isDownHeld() {
@@ -782,6 +792,15 @@ function isDownHeld() {
     if (heldKeys.has(code)) return true;
   }
   return false;
+}
+
+function isDownKey(code) {
+  return KEY.down.has(code);
+}
+
+function syncDropTimers(now = performance.now()) {
+  lastDrop = now;
+  lastSoftDrop = now;
 }
 
 function horizontalHeld() {
@@ -835,7 +854,7 @@ function pressHorizontal(code, dx) {
 
 function startLoop() {
   cancelLoop();
-  lastDrop = performance.now();
+  syncDropTimers();
   lastFrame = performance.now();
   rafId = requestAnimationFrame(gameLoop);
 }
@@ -885,8 +904,8 @@ function onKeyDown(e) {
   if (isKey(code, KEY.down)) {
     if (!heldKeys.has(code)) {
       heldKeys.add(code);
+      syncDropTimers();
       softDrop();
-      lastSoftDrop = performance.now();
     }
     return;
   }
@@ -908,7 +927,11 @@ function onKeyDown(e) {
 }
 
 function onKeyUp(e) {
+  const wasDown = isDownKey(e.code);
   heldKeys.delete(e.code);
+  if (wasDown && !isDownHeld() && running && !paused && !gameOver) {
+    syncDropTimers();
+  }
   if (!horizontalHeld()) {
     moveRepeatOn = false;
     moveHoldAt = 0;
@@ -916,11 +939,19 @@ function onKeyUp(e) {
 }
 
 async function boot() {
+  if (!canvas || !nextCanvas || !ctx || !nextCtx) {
+    console.error("Tetris: missing canvas elements on this page");
+    return;
+  }
+
   const [manifestRes, allowRes] = await Promise.all([
     fetch(`${base}items-manifest.json`),
     fetch(`${base}block-palette-allowlist.json`),
   ]);
-  if (!manifestRes.ok || !allowRes.ok) return;
+  if (!manifestRes.ok || !allowRes.ok) {
+    console.error("Tetris: failed to load block palette data");
+    return;
+  }
 
   const manifest = await manifestRes.json();
   const allow =  (await allowRes.json());
@@ -964,6 +995,17 @@ btnShuffle?.addEventListener("click", async () => {
 });
 document.addEventListener("keydown", onKeyDown, { capture: true });
 document.addEventListener("keyup", onKeyUp, { capture: true });
-window.addEventListener("blur", () => heldKeys.clear());
+window.addEventListener("blur", () => {
+  heldKeys.clear();
+  if (running && !paused && !gameOver) syncDropTimers();
+});
+
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    heldKeys.clear();
+    return;
+  }
+  if (running && !paused && !gameOver) syncDropTimers();
+});
 
 boot();
