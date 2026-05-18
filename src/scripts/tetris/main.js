@@ -685,6 +685,7 @@ function togglePause() {
     heldKeys.clear();
     moveRepeatOn = false;
     moveHoldAt = 0;
+    setInputLock(false);
     cancelLoop();
     stopPlayingFx();
     setOverlayMode("pause");
@@ -695,6 +696,7 @@ function togglePause() {
     setOverlayMode("none");
     syncDropTimers();
     if (btnPause) btnPause.textContent = "Пауза";
+    setInputLock(true);
     startPlayingFx();
     startLoop();
   }
