@@ -5952,6 +5952,11 @@ input[type="number"].gradients-stepper__input:focus {
   }
 }
 
+body.tetris-input-lock {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 .tetris-page.tool-page {
   max-width: min(96vw, 56rem);
   padding-bottom: 3rem;

@@ -37,38 +37,54 @@ const KEY = {
   restart: new Set(["KeyR"]),
 };
 
+const KEY_CHAR = {
+  left: new Set(["a", "A", "ф", "Ф"]),
+  right: new Set(["d", "D", "в", "В"]),
+  down: new Set(["s", "S", "ы", "Ы"]),
+  up: new Set(["w", "W", "ц", "Ц"]),
+};
+
+const HELD_H = { left: "left", right: "right" };
+
 let arenaEl = null;
 
-const SCROLL_BLOCK = new Set([
-  "Space",
-  "ArrowLeft",
-  "ArrowRight",
-  "ArrowUp",
-  "ArrowDown",
-  "KeyW",
-  "KeyA",
-  "KeyS",
-  "KeyD",
-  "KeyP",
-  "KeyR",
-  "Enter",
-  "NumpadEnter",
-]);
+function isTypingTarget(target) {
+  if (!(target instanceof HTMLElement)) return false;
+  const tag = target.tagName;
+  return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || target.isContentEditable;
+}
 
-function blocksPageScroll(code) {
-  return SCROLL_BLOCK.has(code);
+function resolveTetrisKey(e) {
+  const { code, key } = e;
+  if (KEY.restart.has(code)) return "restart";
+  if (KEY.pause.has(code)) return "pause";
+  if (code === "Enter" || code === "NumpadEnter") return "enter";
+  if (KEY.left.has(code) || KEY_CHAR.left.has(key)) return "left";
+  if (KEY.right.has(code) || KEY_CHAR.right.has(key)) return "right";
+  if (KEY.down.has(code) || KEY_CHAR.down.has(key)) return "down";
+  if (KEY.up.has(code) || KEY_CHAR.up.has(key)) return "up";
+  return null;
+}
+
+function blockGameKeyDefault(e) {
+  e.preventDefault();
+  e.stopPropagation();
 }
 
 function focusArena() {
   arenaEl?.focus({ preventScroll: true });
 }
 
+function setInputLock(on) {
+  document.body.classList.toggle("tetris-input-lock", on);
+}
+
 const ROTATIONS = [
   [
-    [[-1, 1], [0, 1], [1, 1], [2, 1]],
+    [[-1, 0], [0, 0], [1, 0], [2, 0]],
     [[1, -1], [1, 0], [1, 1], [1, 2]],
     [[-1, 1], [0, 1], [1, 1], [2, 1]],
-    [[1, -1], [1, 0], [1, 1], [1, 2]],
+    [[0, -1], [0, 0], [0, 1], [0, 2]],
   ],
   [
     [[-1, -1], [-1, 0], [0, 0], [1, 0]],
@@ -90,21 +106,21 @@ const ROTATIONS = [
   ],
   [
     [[-1, 0], [0, 0], [0, -1], [1, -1]],
-    [[0, -1], [1, -1], [0, 0], [0, 1]],
-    [[-1, 0], [0, 0], [0, 1], [1, 1]],
-    [[-1, -1], [-1, 0], [0, 0], [0, -1]],
+    [[0, -1], [0, 0], [1, 0], [1, 1]],
+    [[-1, 1], [0, 1], [0, 0], [1, 0]],
+    [[-1, -1], [-1, 0], [0, 0], [0, 1]],
   ],
   [
     [[-1, -1], [0, -1], [0, 0], [1, 0]],
-    [[0, -1], [0, 0], [1, 0], [1, 1]],
+    [[1, -1], [1, 0], [0, 0], [0, 1]],
     [[-1, 0], [0, 0], [0, 1], [1, 1]],
-    [[-1, -1], [-1, 0], [0, 0], [0, 1]],
+    [[0, -1], [0, 0], [-1, 0], [-1, 1]],
   ],
   [
     [[-1, 0], [0, 0], [1, 0], [0, -1]],
     [[0, -1], [0, 0], [0, 1], [1, 0]],
     [[-1, 0], [0, 0], [1, 0], [0, 1]],
-    [[-1, 0], [0, -1], [0, 0], [0, 1]],
+    [[0, -1], [0, 0], [0, 1], [-1, 0]],
   ],
 ];
 
@@ -166,10 +182,6 @@ function escapeHtml(s) {
   const d = document.createElement("div");
   d.textContent = String(s);
   return d.innerHTML;
-}
-
-function isKey(code, set) {
-  return set.has(code);
 }
 
 function cancelLoop() {
@@ -620,6 +632,7 @@ function endGame() {
   gameOver = true;
   running = false;
   paused = false;
+  setInputLock(false);
   cancelLoop();
   stopPlayingFx();
   drawBoard();
@@ -660,6 +673,7 @@ function startGame() {
     btnPause.disabled = false;
   }
   startPlayingFx();
+  setInputLock(true);
   focusArena();
   startLoop();
 }
@@ -804,21 +818,19 @@ function syncDropTimers(now = performance.now()) {
 }
 
 function horizontalHeld() {
-  for (const code of KEY.left) {
-    if (heldKeys.has(code)) return -1;
-  }
-  for (const code of KEY.right) {
-    if (heldKeys.has(code)) return 1;
-  }
+  if (heldKeys.has(HELD_H.left)) return -1;
+  if (heldKeys.has(HELD_H.right)) return 1;
   return 0;
 }
 
-function clearHorizontalHeld(exceptCode) {
-  for (const code of KEY.left) {
-    if (code !== exceptCode) heldKeys.delete(code);
+function clearHorizontalHeld(exceptDir) {
+  if (exceptDir !== HELD_H.left) {
+    heldKeys.delete(HELD_H.left);
+    for (const code of KEY.left) heldKeys.delete(code);
   }
-  for (const code of KEY.right) {
-    if (code !== exceptCode) heldKeys.delete(code);
+  if (exceptDir !== HELD_H.right) {
+    heldKeys.delete(HELD_H.right);
+    for (const code of KEY.right) heldKeys.delete(code);
   }
 }
 
@@ -843,10 +855,10 @@ function tickHorizontalMove(now) {
   }
 }
 
-function pressHorizontal(code, dx) {
-  clearHorizontalHeld(code);
-  if (heldKeys.has(code)) return;
-  heldKeys.add(code);
+function pressHorizontal(dir, dx) {
+  clearHorizontalHeld(dir);
+  if (heldKeys.has(dir)) return;
+  heldKeys.add(dir);
   move(dx);
   moveHoldAt = performance.now();
   moveRepeatOn = false;
@@ -870,65 +882,77 @@ function handlePauseKey() {
 }
 
 function onKeyDown(e) {
-  const code = e.code;
-  if (!blocksPageScroll(code)) return;
+  if (isTypingTarget(e.target)) return;
 
-  e.preventDefault();
+  const action = resolveTetrisKey(e);
+  if (!action) return;
 
-  if (isKey(code, KEY.restart)) {
+  blockGameKeyDefault(e);
+
+  if (action === "restart") {
     startGame();
     return;
   }
 
-  if (isKey(code, KEY.pause)) {
+  if (action === "pause") {
     handlePauseKey();
     return;
   }
 
   if (overlayMode === "idle" || overlayMode === "gameover") {
-    if (code === "Enter" || code === "NumpadEnter") {
-      startGame();
-    }
+    if (action === "enter") startGame();
     return;
   }
 
   if (overlayMode === "pause") {
-    if (code === "Enter" || code === "NumpadEnter") {
-      togglePause();
-    }
+    if (action === "enter") togglePause();
     return;
   }
 
   if (!running || gameOver || paused) return;
 
-  if (isKey(code, KEY.down)) {
-    if (!heldKeys.has(code)) {
-      heldKeys.add(code);
+  focusArena();
+
+  if (action === "down") {
+    const holdId = KEY.down.has(e.code) ? e.code : "KeyS";
+    if (!heldKeys.has(holdId)) {
+      heldKeys.add(holdId);
       syncDropTimers();
       softDrop();
     }
     return;
   }
 
-  if (isKey(code, KEY.left)) {
-    pressHorizontal(code, -1);
+  if (action === "left") {
+    pressHorizontal(HELD_H.left, -1);
     return;
   }
-  if (isKey(code, KEY.right)) {
-    pressHorizontal(code, 1);
+  if (action === "right") {
+    pressHorizontal(HELD_H.right, 1);
     return;
   }
 
   if (e.repeat) return;
 
-  if (isKey(code, KEY.up)) {
+  if (action === "up") {
     rotate();
   }
 }
 
 function onKeyUp(e) {
-  const wasDown = isDownKey(e.code);
+  if (isTypingTarget(e.target)) return;
+
+  const action = resolveTetrisKey(e);
+  if (action) blockGameKeyDefault(e);
+
+  const wasDown = action === "down" || isDownKey(e.code);
   heldKeys.delete(e.code);
+  if (action === "left") heldKeys.delete(HELD_H.left);
+  if (action === "right") heldKeys.delete(HELD_H.right);
+  if (action === "down") {
+    for (const code of KEY.down) heldKeys.delete(code);
+  }
+
   if (wasDown && !isDownHeld() && running && !paused && !gameOver) {
     syncDropTimers();
   }
@@ -961,7 +985,10 @@ async function boot() {
   );
 
   arenaEl = document.getElementById("tetris-arena");
-  arenaEl?.addEventListener("pointerdown", () => focusArena());
+  if (arenaEl) {
+    arenaEl.setAttribute("role", "application");
+    arenaEl.addEventListener("pointerdown", () => focusArena());
+  }
 
   await assignPieceTextures();
   watchBoardResize();
@@ -993,8 +1020,8 @@ btnShuffle?.addEventListener("click", async () => {
   drawBoard();
   drawNext();
 });
-document.addEventListener("keydown", onKeyDown, { capture: true });
-document.addEventListener("keyup", onKeyUp, { capture: true });
+window.addEventListener("keydown", onKeyDown, { capture: true });
+window.addEventListener("keyup", onKeyUp, { capture: true });
 window.addEventListener("blur", () => {
   heldKeys.clear();
   if (running && !paused && !gameOver) syncDropTimers();
