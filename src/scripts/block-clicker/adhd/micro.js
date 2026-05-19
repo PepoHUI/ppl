@@ -48,6 +48,6 @@ export function tickMicro(now) {
   m.apply();
   showBanner(banner, m.label, "Микро-бонус");
   spawnFloat(floatLayer, m.label, "coin");
-  particles?.ambient(6);
+  if (!document.hidden) particles?.ambient(6);
   return true;
 }

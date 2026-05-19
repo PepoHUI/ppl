@@ -47,8 +47,4 @@ export function initDevConsole(callbacks) {
 
   globalThis.run = run;
   globalThis.runCommand = run;
-
-  console.info(
-    "[BlockClicker] Dev console: run(\"command\", \"gold\", 999) · run(\"command\", \"help\")",
-  );
 }

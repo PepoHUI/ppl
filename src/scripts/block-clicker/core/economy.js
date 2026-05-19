@@ -13,15 +13,31 @@ export const HP_TIER_MULTS = [10, 25];
 
 export const HP_TIER_TIMEOUT_MS = 10_000;
 
-const MIN_BREAK_REWARD = 2;
+export const MIN_BREAK_REWARD = 8;
 
-const UPGRADE_BREAK_BONUS_RATE = 0.025;
+export const UPGRADE_BREAK_BONUS_RATE = 0.054;
+
+const NUM_SUFFIXES = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No"];
+
+export function formatNumFull(n) {
+  const v = Math.floor(Number(n) || 0);
+  if (!Number.isFinite(v)) return "0";
+  return v.toLocaleString("ru-RU");
+}
 
 export function formatNum(n) {
-  if (n < 10000) return String(Math.floor(n));
-  if (n < 1_000_000) return `${(n / 1000).toFixed(1)}K`;
-  if (n < 1_000_000_000) return `${(n / 1_000_000).toFixed(2)}M`;
-  return `${(n / 1_000_000_000).toFixed(2)}B`;
+  const v = Number(n);
+  if (!Number.isFinite(v) || v < 0) return "0";
+  const abs = Math.abs(v);
+  if (abs < 10_000) return String(Math.floor(v));
+  if (abs >= 1e33) return v.toExponential(2);
+
+  const tier = Math.min(NUM_SUFFIXES.length - 1, Math.floor(Math.log10(abs) / 3));
+  const scaled = v / 10 ** (tier * 3);
+  const digits = tier >= 2 ? 2 : 1;
+  const out = `${parseFloat(scaled.toFixed(digits))}${NUM_SUFFIXES[tier]}`;
+  if (out.length > 8) return v.toExponential(2);
+  return out;
 }
 
 export function clickDamage() {

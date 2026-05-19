@@ -136,13 +136,22 @@
                 <span class="bc-arena__scan" aria-hidden="true"></span>
 
                 <div class="bc-layer bc-layer--conveyor" id="bc-conveyor" aria-hidden="true"></div>
-                <div class="bc-layer bc-layer--golem" id="bc-golem" aria-hidden="true">
+                <div
+                  class="bc-layer bc-layer--golem"
+                  id="bc-golem"
+                  aria-hidden="true"
+                  title="Добывает блоки без усталости."
+                  aria-label="Добывает блоки без усталости."
+                >
                   <span class="bc-golem__phase" aria-hidden="true"></span>
                   <span class="bc-golem__body"></span>
                   <span class="bc-golem__eye"></span>
                   <span class="bc-golem__zzz" aria-hidden="true">z</span>
                 </div>
                 <div class="bc-layer bc-layer--beacon" id="bc-beacon" aria-hidden="true"></div>
+                <div class="bc-fx bc-fx--storm" id="bc-fx-storm" aria-hidden="true"></div>
+                <div class="bc-fx bc-fx--treasure" id="bc-fx-treasure" aria-hidden="true"></div>
+                <div class="bc-fx bc-fx--tnt" id="bc-fx-tnt" aria-hidden="true"></div>
 
                 <div class="bc-arena__body">
                 <div class="bc-rhythm" id="bc-rhythm" aria-label="Ритм-полоска">
@@ -187,6 +196,18 @@
               <div class="bc-forge__nodes" id="bc-forge-nodes"></div>
             </div>
           </aside>
+        </div>
+
+        <div class="bc-finale" id="bc-finale" hidden aria-hidden="true">
+          <div class="bc-finale__backdrop" aria-hidden="true"></div>
+          <div class="bc-finale__burst" aria-hidden="true"></div>
+          <div class="bc-finale__rings" aria-hidden="true">
+            <span class="bc-finale__ring"></span>
+            <span class="bc-finale__ring bc-finale__ring--b"></span>
+            <span class="bc-finale__ring bc-finale__ring--c"></span>
+          </div>
+          <p class="bc-finale__title">OMEGA</p>
+          <p class="bc-finale__sub">Кузница завершена</p>
         </div>
       </div>
     </article>

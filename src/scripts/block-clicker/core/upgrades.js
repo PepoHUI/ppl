@@ -1,10 +1,16 @@
 import { game, lvl, grantUnlock } from "./state.js";
 
-const FIRST_UPGRADE_COST = 2;
+export const FIRST_UPGRADE_COST = 2;
 
-const LEVEL_COST_MULT = 2;
+export const LEVEL_COST_MULT = 1.575;
 
-const NEXT_NODE_COST_MULT = 2.5;
+export const NEXT_NODE_COST_MULT = 1.79;
+
+export const HP_LEVEL_MULT = 1.1;
+
+export const FORGE_DAMAGE_PER_LEVEL = 2.5;
+
+export const FORGE_REWARD_PER_LEVEL = 0.02;
 
 export const FORGE_NODES = [
   {
@@ -32,7 +38,7 @@ export const FORGE_NODES = [
     row: 1,
     max: 10,
     eventTitle: (l) => `Голем проснулся · ${l}`,
-    eventDesc: () => "15 с бьёт как конвейер, 15 с отдыхает",
+    eventDesc: () => "18 с мощного штурма — сильнее ленты, 6 с отдых",
     milestones: {
       1: { unlocks: ["golem"] },
       4: { unlocks: ["golemAttack"] },
@@ -160,6 +166,11 @@ export function nodeLevel(id) {
   return lvl(id);
 }
 
+export function isOverdriveMaxed() {
+  const node = FORGE_NODES.find((n) => n.id === "overdrive");
+  return !!node && lvl("overdrive") >= node.max;
+}
+
 export function prerequisiteNode(node) {
   const idx = FORGE_NODES.findIndex((n) => n.id === node.id);
   if (idx <= 0) return null;
@@ -234,7 +245,7 @@ export function totalForgeLevels() {
 }
 
 export function upgradeHpMultiplier() {
-  return 1.2 ** totalForgeLevels();
+  return HP_LEVEL_MULT ** totalForgeLevels();
 }
 
 export function isConveyorMaxed() {
@@ -243,11 +254,11 @@ export function isConveyorMaxed() {
 }
 
 export function upgradeDamageBonus() {
-  return totalForgeLevels() * 2;
+  return totalForgeLevels() * FORGE_DAMAGE_PER_LEVEL;
 }
 
 export function upgradeRewardMultiplier() {
-  return 1 + totalForgeLevels() * 0.01;
+  return 1 + totalForgeLevels() * FORGE_REWARD_PER_LEVEL;
 }
 
 export function chaosTier() {

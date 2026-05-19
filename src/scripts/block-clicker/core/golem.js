@@ -1,7 +1,9 @@
 import { hasUnlock, lvl } from "./state.js";
 
-export const GOLEM_WORK_MS = 15_000;
-export const GOLEM_REST_MS = 15_000;
+export const GOLEM_WORK_MS = 18_000;
+export const GOLEM_REST_MS = 6_000;
+
+export const GOLEM_AUTO_DAMAGE_MULT = 1.25;
 
 let phase = "work";
 let phaseStartedAt = 0;
@@ -56,8 +58,8 @@ export function tickGolemCycle(now = performance.now()) {
 export function golemCps() {
   if (!isGolemWorking()) return 0;
 
-  let cps = lvl("golem") * 0.5;
-  if (hasUnlock("golemAttack")) cps += lvl("golem") * 0.35;
-  if (hasUnlock("golemRage")) cps *= 1.2;
+  let cps = lvl("golem") * 0.9;
+  if (hasUnlock("golemAttack")) cps += lvl("golem") * 0.55;
+  if (hasUnlock("golemRage")) cps *= 1.35;
   return cps;
 }

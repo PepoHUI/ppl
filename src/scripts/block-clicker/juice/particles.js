@@ -5,18 +5,18 @@ const reduced =
   typeof window !== "undefined" &&
   window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-export class ParticleEngine {
+const MAX_PARTICLES = 140;
 
+export class ParticleEngine {
   constructor(canvas) {
     this.canvas = canvas;
-
     this.app = null;
-
     this.layer = null;
-
+    this.gfx = null;
     this.particles = [];
     this.ambientTimer = 0;
     this.ready = false;
+    this.tabPaused = false;
   }
 
   async init() {
@@ -33,15 +33,18 @@ export class ParticleEngine {
       height: h,
       backgroundAlpha: 0,
       antialias: false,
-      resolution: Math.min(2, window.devicePixelRatio || 1),
+      resolution: Math.min(1.5, window.devicePixelRatio || 1),
       autoDensity: true,
     });
 
     this.layer = new Container();
+    this.gfx = new Graphics();
+    this.layer.addChild(this.gfx);
     this.app.stage.addChild(this.layer);
     this.ready = true;
 
     this.app.ticker.add(() => this.tick());
+    this.app.ticker.stop();
     window.addEventListener("resize", () => this.resize());
   }
 
@@ -55,8 +58,41 @@ export class ParticleEngine {
     return progressVfxScale();
   }
 
+  wakeTicker() {
+    if (!this.app || reduced || this.tabPaused) return;
+    this.app.ticker.start();
+  }
+
+  sleepTickerIfIdle() {
+    if (this.particles.length === 0 && this.app) {
+      this.app.ticker.stop();
+    }
+  }
+
+  pause() {
+    this.tabPaused = true;
+    this.app?.ticker.stop();
+  }
+
+  resume() {
+    this.tabPaused = false;
+    if (this.particles.length > 0) this.wakeTicker();
+  }
+
+  trimParticles() {
+    if (this.particles.length > MAX_PARTICLES) {
+      this.particles.splice(0, this.particles.length - MAX_PARTICLES);
+    }
+  }
+
+  pushParticle(p) {
+    this.particles.push(p);
+    this.trimParticles();
+    this.wakeTicker();
+  }
+
   tick() {
-    if (!this.app) return;
+    if (!this.app || this.tabPaused) return;
     const scale = this.vfxScale();
     const dt = this.app.ticker.deltaMS / 1000;
     this.ambientTimer += dt;
@@ -74,14 +110,15 @@ export class ParticleEngine {
       p.vx *= 0.98;
     }
     this.particles = this.particles.filter((p) => p.life > 0);
-    this.layer?.removeChildren();
+
+    this.gfx?.clear();
     for (const p of this.particles) {
-      const g = new Graphics();
       const alpha = Math.min(1, p.life / p.max);
-      g.circle(p.x, p.y, p.size * alpha);
-      g.fill({ color: p.color, alpha: alpha * 0.9 });
-      this.layer?.addChild(g);
+      this.gfx?.circle(p.x, p.y, p.size * alpha);
+      this.gfx?.fill({ color: p.color, alpha: alpha * 0.9 });
     }
+
+    this.sleepTickerIfIdle();
   }
 
   center() {
@@ -103,7 +140,7 @@ export class ParticleEngine {
     for (let i = 0; i < n; i++) {
       const a = Math.random() * Math.PI * 2;
       const sp = speed * (0.4 + Math.random() * 0.9) * (0.35 + scale * 0.65);
-      this.particles.push({
+      this.pushParticle({
         x,
         y,
         vx: Math.cos(a) * sp,
@@ -118,9 +155,9 @@ export class ParticleEngine {
   }
 
   ambient(n = 3) {
-    if (!this.ready || reduced || !this.app) return;
+    if (!this.ready || reduced || !this.app || this.tabPaused) return;
     for (let i = 0; i < n; i++) {
-      this.particles.push({
+      this.pushParticle({
         x: Math.random() * this.app.screen.width,
         y: this.app.screen.height + 10,
         vx: (Math.random() - 0.5) * 20,
@@ -171,7 +208,7 @@ export class ParticleEngine {
     const n = Math.max(6, Math.floor(16 * scale));
     for (let i = 0; i < n; i++) {
       const a = (i / n) * Math.PI * 2;
-      this.particles.push({
+      this.pushParticle({
         x,
         y,
         vx: Math.cos(a) * 220 * (0.4 + scale * 0.6),
@@ -190,7 +227,7 @@ export class ParticleEngine {
     const scale = this.vfxScale();
     const n = Math.floor(15 + scale * 25);
     for (let i = 0; i < n; i++) {
-      this.particles.push({
+      this.pushParticle({
         x: Math.random() * this.app.screen.width,
         y: -10,
         vx: (Math.random() - 0.5) * 60,
@@ -202,5 +239,42 @@ export class ParticleEngine {
         g: 40,
       });
     }
+  }
+
+  coinBurst(x, y) {
+    this.burst(x, y, {
+      count: 40,
+      colors: [0xfbbf24, 0xfde68a, 0xf97316, 0xffffff],
+      speed: 200,
+      life: 1,
+      size: 4,
+    });
+    this.treasureRain();
+  }
+
+  sparkBurst(x, y) {
+    this.burst(x, y, {
+      count: 28,
+      colors: [0xf97316, 0xfbbf24, 0xfef3c7],
+      speed: 240,
+      life: 0.55,
+      size: 3,
+    });
+    this.shockwave(x, y);
+  }
+
+  finaleBurst() {
+    const { x, y } = this.center();
+    const scale = this.vfxScale();
+    this.shockwave(x, y);
+    setTimeout(() => this.shockwave(x, y), 90);
+    this.burst(x, y, {
+      count: Math.floor(55 + scale * 35),
+      colors: [0xfbbf24, 0xa78bfa, 0xfde68a, 0xffffff, 0xc4b5fd],
+      speed: 260,
+      life: 1.35,
+      size: 5,
+    });
+    this.treasureRain();
   }
 }

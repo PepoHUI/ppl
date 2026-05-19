@@ -6410,7 +6410,7 @@ body.tetris-input-lock {
   --bc-breathe: 0;
 }
 
-.bc-app > *:not(.bc-bg) {
+.bc-app > *:not(.bc-bg):not(.bc-finale) {
   position: relative;
   z-index: 1;
 }
@@ -6624,6 +6624,104 @@ body.tetris-input-lock {
   z-index: 2;
 }
 
+.bc-fx {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.45s ease;
+  z-index: 1;
+}
+
+.bc-fx--active {
+  opacity: 1;
+}
+
+.bc-fx--storm::before,
+.bc-fx--storm::after {
+  content: "";
+  position: absolute;
+  width: 2px;
+  height: 55%;
+  top: 8%;
+  background: linear-gradient(180deg, transparent, rgba(125, 211, 252, 0.85), transparent);
+  opacity: 0;
+  animation: bc-storm-flicker 2.8s ease-in-out infinite;
+}
+
+.bc-fx--storm::before {
+  left: 28%;
+  transform: skewX(-8deg);
+}
+
+.bc-fx--storm::after {
+  right: 24%;
+  animation-delay: 1.1s;
+  transform: skewX(6deg);
+}
+
+.bc-fx--active.bc-fx--storm::before,
+.bc-fx--active.bc-fx--storm::after {
+  opacity: 0.7;
+}
+
+@keyframes bc-storm-flicker {
+  0%,
+  88%,
+  100% {
+    opacity: 0;
+  }
+  8%,
+  12% {
+    opacity: 0.85;
+  }
+  10% {
+    opacity: 0.35;
+  }
+}
+
+.bc-fx--treasure {
+  background:
+    radial-gradient(circle at 12% 80%, rgba(251, 191, 36, 0.22), transparent 42%),
+    radial-gradient(circle at 88% 75%, rgba(251, 191, 36, 0.18), transparent 38%);
+  animation: bc-treasure-sparkle 3.2s ease-in-out infinite;
+}
+
+@keyframes bc-treasure-sparkle {
+  50% {
+    filter: brightness(1.25);
+  }
+}
+
+.bc-fx--tnt {
+  background: linear-gradient(0deg, rgba(249, 115, 22, 0.28), transparent 45%);
+  animation: bc-tnt-ember 2.4s ease-in-out infinite;
+}
+
+@keyframes bc-tnt-ember {
+  50% {
+    opacity: 0.65;
+  }
+}
+
+.bc-fx-biome--owned {
+  animation: bc-biome-pulse 4s ease-in-out infinite;
+}
+
+@keyframes bc-biome-pulse {
+  50% {
+    filter: brightness(1.15) saturate(1.2);
+  }
+}
+
+.bc-rhythm--owned .bc-rhythm__track {
+  box-shadow: 0 0 12px rgba(52, 211, 153, 0.35);
+}
+
+.bc-rhythm--owned .bc-rhythm__zone {
+  background: rgba(52, 211, 153, 0.22);
+}
+
 .bc-arena--storm {
   box-shadow:
     var(--shadow-sm),
@@ -6639,6 +6737,165 @@ body.tetris-input-lock {
   50% {
     box-shadow: 0 0 48px rgba(167, 139, 250, 0.35);
   }
+}
+
+.bc-arena--omega {
+  border-color: rgba(251, 191, 36, 0.65);
+  animation: bc-omega-glow 2.4s ease-in-out infinite;
+}
+
+@keyframes bc-omega-glow {
+  50% {
+    box-shadow:
+      var(--shadow-sm),
+      0 0 56px rgba(251, 191, 36, 0.28),
+      0 0 32px rgba(167, 139, 250, 0.35);
+  }
+}
+
+.bc-app--omega .bc-bg__orb--a {
+  animation-duration: 3.5s;
+}
+
+.bc-app--finale {
+  pointer-events: none;
+}
+
+.bc-app--finale .bc-main {
+  pointer-events: none;
+}
+
+.bc-finale {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.bc-finale:not([hidden]) {
+  display: flex;
+}
+
+.bc-finale[hidden] {
+  display: none !important;
+}
+
+.bc-finale__backdrop {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 45%, rgba(167, 139, 250, 0.22), transparent 70%),
+    rgba(2, 6, 23, 0.72);
+  backdrop-filter: blur(4px);
+}
+
+.bc-finale__burst {
+  position: absolute;
+  width: min(90vw, 22rem);
+  height: min(90vw, 22rem);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(253, 224, 71, 0.55) 0%, rgba(167, 139, 250, 0.35) 35%, transparent 68%);
+  transform: scale(0.2);
+  opacity: 0;
+}
+
+.bc-finale__rings {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.bc-finale__ring {
+  position: absolute;
+  width: min(70vw, 16rem);
+  height: min(70vw, 16rem);
+  border-radius: 50%;
+  border: 2px solid rgba(251, 191, 36, 0.45);
+  box-shadow: 0 0 24px rgba(167, 139, 250, 0.35);
+}
+
+.bc-finale__ring--b {
+  width: min(82vw, 19rem);
+  height: min(82vw, 19rem);
+  border-color: rgba(167, 139, 250, 0.4);
+}
+
+.bc-finale__ring--c {
+  width: min(94vw, 22rem);
+  height: min(94vw, 22rem);
+  border-color: rgba(253, 224, 71, 0.28);
+}
+
+.bc-finale__title {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: clamp(2rem, 8vw, 3.25rem);
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-indent: 0.28em;
+  color: #fde68a;
+  text-shadow:
+    0 0 24px rgba(251, 191, 36, 0.65),
+    0 0 48px rgba(167, 139, 250, 0.45);
+}
+
+.bc-finale__sub {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  letter-spacing: 0.12em;
+  color: rgba(226, 232, 240, 0.85);
+}
+
+.bc-fx--finale-flash {
+  animation: bc-fx-finale-flash 1.2s ease-out;
+}
+
+@keyframes bc-fx-finale-flash {
+  0% {
+    filter: brightness(2.2);
+    opacity: 1;
+  }
+  100% {
+    filter: brightness(1);
+    opacity: 1;
+  }
+}
+
+.bc-arena--finale-pulse {
+  animation: bc-arena-finale-pulse 1.4s ease-out;
+}
+
+@keyframes bc-arena-finale-pulse {
+  0% {
+    box-shadow: 0 0 0 rgba(167, 139, 250, 0);
+  }
+  35% {
+    box-shadow: 0 0 64px rgba(167, 139, 250, 0.55);
+  }
+  100% {
+    box-shadow: 0 0 24px rgba(167, 139, 250, 0.2);
+  }
+}
+
+.bc-forge--complete .bc-wire--lit {
+  stroke: rgba(253, 224, 71, 0.75);
+  filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.55));
+}
+
+.bc-forge--complete {
+  box-shadow: inset 0 0 32px rgba(167, 139, 250, 0.08);
 }
 
 .bc-layer {
@@ -6679,6 +6936,11 @@ body.tetris-input-lock {
   bottom: 22%;
   width: 2.75rem;
   height: 2.85rem;
+}
+
+.bc-layer--golem.bc-layer--active {
+  pointer-events: auto;
+  cursor: help;
 }
 
 .bc-golem__phase {
@@ -7071,10 +7333,12 @@ body.tetris-input-lock {
   left: 50%;
   top: 0;
   width: min(100%, 17.5rem);
-  height: 100%;
+  height: auto;
+  min-height: 100%;
   transform: translateX(-50%);
   pointer-events: none;
   z-index: 0;
+  overflow: visible;
 }
 
 .bc-wire {
@@ -7187,6 +7451,11 @@ body.tetris-input-lock {
   font-family: var(--font-mono);
   font-size: 0.62rem;
   color: #fde68a;
+}
+
+.bc-node__cost--compact {
+  font-size: 0.54rem;
+  letter-spacing: -0.03em;
 }
 
 .bc-app[data-tier="3"] .bc-hud__value,

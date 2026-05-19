@@ -9,7 +9,8 @@
     "palette:allowlist": "node scripts/generate-block-palette-allowlist.mjs",
     "build": "vite build",
     "preview": "vite preview",
-    "preview:pages": "npm run build && vite preview"
+    "preview:pages": "npm run build && vite preview",
+    "balance:bc": "node scripts/sim-block-clicker-balance.mjs"
   },
   "devDependencies": {
     "minecraft-data": "^3.110.0",

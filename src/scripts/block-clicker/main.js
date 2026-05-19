@@ -1,6 +1,6 @@
 import "../page-loader.js";
 import { whenPageLoaded } from "../page-loader.js";
-import { game, resetGame, grantUnlock } from "./core/state.js";
+import { game, resetGame, grantUnlock, hasUnlock } from "./core/state.js";
 import { formatNum } from "./core/economy.js";
 import {
   clickDamage,
@@ -41,6 +41,15 @@ import { initAnticipation, updateAnticipation, nearMissFloat } from "./adhd/anti
 import { initMicro, tickMicro } from "./adhd/micro.js";
 import { initEvents, rollJackpot, triggerJackpot } from "./adhd/events.js";
 import { initWorkshop, renderForge, flashNode } from "./ui/workshop.js";
+import {
+  hasSeenFirstBuy,
+  markFirstBuy,
+  playFirstBuyReveal,
+  syncUpgradeLayers,
+  hasSeenOverdriveFinale,
+  markOverdriveFinaleSeen,
+  playOverdriveFinale,
+} from "./juice/forge-reveals.js";
 import { initHud, updateHud, setCoinsAnimating, coinsEl } from "./ui/hud.js";
 import { syncVisualLayers } from "./ui/layers.js";
 import {
@@ -48,6 +57,10 @@ import {
   resetGolemCycle,
   tickGolemCycle,
   setGolemPhaseListener,
+  isGolemWorking,
+  getGolemPhase,
+  golemPhaseProgress,
+  GOLEM_AUTO_DAMAGE_MULT,
 } from "./core/golem.js";
 import { applyGolemPhase, syncGolemPhaseMeter } from "./ui/golem-visual.js";
 import { initDevConsole } from "./dev-console.js";
@@ -73,6 +86,36 @@ const particles = new ParticleEngine(vfxCanvas);
 let autoAccumulator = 0;
 let lastTick = 0;
 let chainMineBuffer = 0;
+let tabHidden = false;
+let lastAnticipationAt = 0;
+let lastCoinsForAnticipation = -1;
+let lastMeterAt = 0;
+let lastMeterPhase = "";
+let lastMeterProgress = -1;
+
+function maybeUpdateAnticipation(now) {
+  if (now - lastAnticipationAt < 250 && game.coins === lastCoinsForAnticipation) return;
+  lastAnticipationAt = now;
+  lastCoinsForAnticipation = game.coins;
+  updateAnticipation();
+}
+
+function maybeSyncGolemPhaseMeter(now) {
+  if (!hasUnlock("golem")) return;
+  const phase = getGolemPhase();
+  const progress = golemPhaseProgress(now);
+  if (
+    now - lastMeterAt < 100 &&
+    phase === lastMeterPhase &&
+    Math.abs(progress - lastMeterProgress) < 0.02
+  ) {
+    return;
+  }
+  lastMeterAt = now;
+  lastMeterPhase = phase;
+  lastMeterProgress = progress;
+  syncGolemPhaseMeter(now);
+}
 
 function pickBlock() {
   const pool = game.blockPool;
@@ -165,6 +208,10 @@ function particleCenter() {
 function applyDamage(dmg, fromAuto = false, perfect = false) {
   const cur = game.current;
   if (!cur) return;
+
+  if (fromAuto && isGolemWorking()) {
+    dmg = Math.ceil(dmg * GOLEM_AUTO_DAMAGE_MULT);
+  }
 
   const crit = !fromAuto && Math.random() < critChance();
   let total = crit ? Math.ceil(dmg * 2.8) : dmg;
@@ -268,6 +315,7 @@ function resetProgress() {
   game.current = null;
   spawnBlock();
   renderForge();
+  syncUpgradeLayers();
   syncVisualLayers(appEl);
   updateHud();
   updateAnticipation();
@@ -330,11 +378,28 @@ function buyAffordableUpgrade() {
   return false;
 }
 
+function revealCtx() {
+  return {
+    arena: arenaEl,
+    world: worldEl,
+    app: appEl,
+    particles,
+    banner: bannerEl,
+    rhythm: document.getElementById("bc-rhythm"),
+    beacon: document.getElementById("bc-beacon"),
+    biome: document.getElementById("bc-biome"),
+  };
+}
+
 function buyNode(id) {
   const node = FORGE_NODES.find((n) => n.id === id);
   if (!node || !canBuyNode(node)) return;
 
   const level = game.upgrades[node.id] ?? 0;
+  const wasFirstLevel = level === 0;
+  const newLevel = level + 1;
+  const isOverdriveFinale = id === "overdrive" && newLevel === node.max;
+  const playFinaleNow = isOverdriveFinale && !hasSeenOverdriveFinale();
   const cost = upgradeCost(node.id, level);
   const prev = game.coins;
   game.coins -= cost;
@@ -352,16 +417,26 @@ function buyNode(id) {
   setTimeout(() => setCoinsAnimating(false), 500);
 
   playUpgrade();
-  freezeFrame(appEl, 140);
-  particles.upgradeCelebration();
-  punch(worldEl, 2.5);
 
-  const title = node.eventTitle(level + 1);
-  const sub = node.eventDesc(level + 1);
-  showBanner(bannerEl, title, sub);
+  if (playFinaleNow) {
+    playOverdriveFinale(revealCtx());
+    markOverdriveFinaleSeen();
+  } else {
+    freezeFrame(appEl, 140);
+    particles.upgradeCelebration();
+    punch(worldEl, 2.5);
+    showBanner(bannerEl, node.eventTitle(newLevel), node.eventDesc(newLevel));
+  }
 
   flashNode(id);
+
+  if (wasFirstLevel && !hasSeenFirstBuy(id)) {
+    playFirstBuyReveal(id, revealCtx());
+    markFirstBuy(id);
+  }
+
   renderForge();
+  syncUpgradeLayers();
   syncVisualLayers(appEl);
   updateAnticipation();
   updateHud();
@@ -369,6 +444,8 @@ function buyNode(id) {
 
 function gameLoop(now) {
   requestAnimationFrame(gameLoop);
+  if (tabHidden) return;
+
   const dt = lastTick ? Math.min(50, now - lastTick) : 16;
   lastTick = now;
 
@@ -384,10 +461,10 @@ function gameLoop(now) {
   }
   if (tickCombo(now)) updateHud();
   tickGolemCycle(now);
-  syncGolemPhaseMeter(now);
+  maybeSyncGolemPhaseMeter(now);
   tickAuto(dt);
   tickMicro(now);
-  updateAnticipation();
+  maybeUpdateAnticipation(now);
 }
 
 async function boot() {
@@ -428,6 +505,7 @@ async function boot() {
 
   spawnBlock();
   renderForge();
+  syncUpgradeLayers();
   syncVisualLayers(appEl);
   updateHud();
   updateAnticipation();
@@ -451,6 +529,14 @@ async function boot() {
 
   blockBtn?.addEventListener("click", handleClick);
   document.addEventListener("keydown", handleGameKeydown, { capture: true });
+
+  document.addEventListener("visibilitychange", () => {
+    tabHidden = document.hidden;
+    if (tabHidden) particles.pause();
+    else particles.resume();
+  });
+  tabHidden = document.hidden;
+  if (tabHidden) particles.pause();
 
   lastTick = performance.now();
   requestAnimationFrame(gameLoop);
