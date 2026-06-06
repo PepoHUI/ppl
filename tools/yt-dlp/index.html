@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>yt-dlp — конструктор команды · PepoHUI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
+    <link rel="stylesheet" href="/src/styles/main.css" />
+    <link rel="stylesheet" href="/src/styles/yt-dlp.css" />
+    <script>
+      (function () {
+        try {
+          if (sessionStorage.getItem("ppl:welcome-done") === "1") {
+            document.documentElement.classList.add("ppl-skip-welcome");
+          }
+        } catch (_) {}
+      })();
+    </script>
+  </head>
+  <body class="is-loading">
+    <div id="page-loader" class="page-loader" aria-busy="true" aria-live="polite">
+      <div class="page-loader__grid" aria-hidden="true"></div>
+      <div class="page-loader__frame" aria-hidden="true">
+        <span></span><span></span><span></span><span></span>
+      </div>
+      <div class="page-loader__inner">
+        <div class="page-loader__mark">◆</div>
+        <div class="page-loader__brand">PepoHUI</div>
+        <div class="page-loader__line" aria-hidden="true"></div>
+        <div class="page-loader__sub">ppl</div>
+      </div>
+    </div>
+    <div class="noise" aria-hidden="true"></div>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="logo" href="../../">
+          <span class="logo__mark">◆</span>
+          <span class="logo__text">PepoHUI</span>
+        </a>
+        <a class="header-repo-link" href="https://github.com/PepoHUI/ppl" target="_blank" rel="noopener noreferrer">
+          <span class="header-repo-link__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M12 .5a12 12 0 0 0-3.79 23.39c.6.11.82-.26.82-.58v-2.02c-3.34.73-4.04-1.61-4.04-1.61-.55-1.38-1.33-1.75-1.33-1.75-1.09-.74.08-.73.08-.73 1.2.08 1.83 1.24 1.83 1.24 1.07 1.83 2.81 1.3 3.49.99.11-.78.42-1.3.76-1.6-2.67-.31-5.48-1.34-5.48-5.95 0-1.31.47-2.38 1.23-3.22-.12-.31-.53-1.55.12-3.23 0 0 1.01-.32 3.3 1.23a11.4 11.4 0 0 1 6.01 0c2.29-1.55 3.29-1.23 3.29-1.23.66 1.68.25 2.92.13 3.23.76.84 1.22 1.91 1.22 3.22 0 4.62-2.82 5.64-5.5 5.94.43.38.82 1.13.82 2.27v3.37c0 .32.21.7.83.58A12 12 0 0 0 12 .5Z"
+              />
+            </svg>
+          </span>
+          <span class="header-repo-link__text">pepohui/ppl</span>
+        </a>
+        <a class="badge badge--faq" href="../../faq/">
+          <span class="badge-faq__shine" aria-hidden="true"></span>
+          <span class="badge-faq__body">
+            <span class="badge-faq__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.75" />
+                <path
+                  d="M9.75 9.75a2.25 2.25 0 0 1 3.82 1.59c0 1.2-.6 1.76-1.1 2.23-.33.3-.55.57-.55 1.06V15"
+                  stroke="currentColor"
+                  stroke-width="1.75"
+                  stroke-linecap="round"
+                />
+                <path d="M12 17.25v.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              </svg>
+            </span>
+            <span class="badge-faq__label">FAQ</span>
+          </span>
+        </a>
+      </div>
+    </header>
+
+    <article class="tool-page tool-page--ytdlp">
+      <a class="back-link" href="../../">← На главную</a>
+      <h1 class="tool-page__title">yt-dlp</h1>
+      <p class="tool-page__intro">
+        Конструктор команды для yt-dlp — ссылка, качество (mp4), папка и фрагмент без запоминания флагов
+      </p>
+
+      <div class="ytdlp">
+        <section class="ytdlp-form" aria-label="Параметры">
+          <label class="ytdlp-field">
+            <span class="ytdlp-label">Ссылка на видео</span>
+            <input type="text" id="urlInput" placeholder="https://youtu.be/…" autocomplete="off" spellcheck="false" />
+          </label>
+
+          <label class="ytdlp-field">
+            <span class="ytdlp-label">Качество</span>
+            <select id="qualitySelect">
+              <option value="Best">Максимальное</option>
+              <option value="1080">1080p</option>
+              <option value="720">720p</option>
+              <option value="480">480p</option>
+              <option value="360">360p</option>
+            </select>
+          </label>
+
+          <div class="ytdlp-field">
+            <span class="ytdlp-label">Папка сохранения</span>
+            <input type="text" id="folderInput" placeholder="напр. C:\Users\me\Downloads" autocomplete="off" spellcheck="false" />
+            <div class="ytdlp-presets" id="folderPresets"></div>
+          </div>
+
+          <div class="ytdlp-field">
+            <label class="ytdlp-check">
+              <input type="checkbox" id="fragToggle" />
+              <span>Скачать только фрагмент</span>
+            </label>
+            <div class="ytdlp-frag" id="fragRow" hidden>
+              <input type="text" id="fragFrom" placeholder="с 00:40" autocomplete="off" />
+              <span class="ytdlp-frag-sep">→</span>
+              <input type="text" id="fragTo" placeholder="по 00:50" autocomplete="off" />
+            </div>
+          </div>
+
+          <p class="ytdlp-warn" id="warnBox" style="display: none" role="alert"></p>
+        </section>
+
+        <section class="ytdlp-output" aria-label="Команда">
+          <span class="ytdlp-label">Команда</span>
+          <pre class="ytdlp-cmd"><code id="cmdText"></code></pre>
+          <button type="button" class="ytdlp-btn ytdlp-btn-copy" id="copyCmdBtn" disabled>Скопировать команду</button>
+        </section>
+
+        <details class="ytdlp-help">
+          <summary class="ytdlp-help__summary">
+            <span class="ytdlp-help__summary-text">Как пользоваться</span>
+            <span class="ytdlp-help__chevron" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </span>
+          </summary>
+
+          <div class="ytdlp-help__body">
+            <div class="ytdlp-os" role="tablist" aria-label="ОС" id="osSwitch">
+              <button type="button" class="ytdlp-os__btn" data-os="windows" role="tab">Windows</button>
+              <button type="button" class="ytdlp-os__btn" data-os="macos" role="tab">macOS</button>
+              <button type="button" class="ytdlp-os__btn" data-os="linux" role="tab">Linux</button>
+            </div>
+
+            <ol class="ytdlp-steps">
+              <li>
+                <span class="ytdlp-step__title">1. Установить yt-dlp и ffmpeg</span>
+                <div class="ytdlp-cmd-list" id="installList"></div>
+              </li>
+              <li>
+                <span class="ytdlp-step__title">2. Открыть консоль</span>
+                <p class="ytdlp-step__hint" id="consoleHint"></p>
+              </li>
+              <li>
+                <span class="ytdlp-step__title">3. Вставить команду</span>
+                <p class="ytdlp-step__hint">Скопируйте команду выше и вставьте в консоль, затем нажмите Enter.</p>
+              </li>
+              <li>
+                <span class="ytdlp-step__title">4. Что заполнять в форме</span>
+                <p class="ytdlp-step__hint">
+                  Вставьте ссылку на видео, выберите нужное качество и папку для сохранения — папка
+                  запоминается и подставится при следующих запросах. При необходимости включите
+                  «Скачать только фрагмент» и укажите промежуток (с — по), чтобы скачать часть видео,
+                  а не целиком.
+                </p>
+              </li>
+            </ol>
+          </div>
+        </details>
+      </div>
+    </article>
+
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <p class="footer-legal">
+          Сайт <span class="footer-site">pepohui.github.io/ppl</span> не является официальной частью сети серверов
+          <a class="footer-link--pepeland" href="https://pepeland.net" target="_blank" rel="noopener noreferrer">PepeLand</a>.
+        </p>
+        <p class="footer-row">
+          <a href="../../privacy-policy/">Privacy Policy</a>
+          <span class="footer-sep" aria-hidden="true">·</span>
+          <span class="footer-minecraft">Not an official Minecraft product.</span>
+        </p>
+        <p class="footer-copy">
+          © PepoHUI ·
+          <a href="https://github.com/PepoHUI/ppl" target="_blank" rel="noopener noreferrer">ppl</a>
+        </p>
+      </div>
+    </footer>
+
+    <script type="module" src="/src/scripts/yt-dlp/main.js"></script>
+  </body>
+</html>

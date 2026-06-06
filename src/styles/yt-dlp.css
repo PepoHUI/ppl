@@ -1,0 +1,283 @@
+.ytdlp {
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* ---- cards ---------------------------------------------------------------- */
+
+.ytdlp-form,
+.ytdlp-output {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 22px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.015));
+  box-shadow: 0 18px 40px -28px rgba(0, 0, 0, 0.8);
+}
+
+/* ---- form fields ---------------------------------------------------------- */
+
+.ytdlp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ytdlp-label {
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+.ytdlp-field input[type="text"],
+.ytdlp-field select,
+.ytdlp-frag input {
+  font-family: inherit;
+  font-size: 0.95rem;
+  padding: 11px 13px;
+  border-radius: 11px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(0, 0, 0, 0.25);
+  color: #fff;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.ytdlp-field input[type="text"]:focus,
+.ytdlp-field select:focus,
+.ytdlp-frag input:focus {
+  outline: none;
+  border-color: rgba(242, 152, 212, 0.85);
+  box-shadow: 0 0 0 3px rgba(242, 152, 212, 0.14);
+}
+
+.ytdlp-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ytdlp-preset {
+  font-family: inherit;
+  cursor: pointer;
+  font-size: 0.8rem;
+  padding: 6px 13px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  transition: border-color 0.18s ease, background 0.18s ease, transform 0.1s ease;
+}
+.ytdlp-preset:hover {
+  border-color: rgba(242, 152, 212, 0.85);
+  background: rgba(242, 152, 212, 0.1);
+}
+.ytdlp-preset:active {
+  transform: translateY(1px);
+}
+
+.ytdlp-check {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  user-select: none;
+}
+.ytdlp-check input {
+  width: 16px;
+  height: 16px;
+  accent-color: #f298d4;
+}
+.ytdlp-frag {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+.ytdlp-frag input {
+  flex: 1;
+  min-width: 0;
+}
+.ytdlp-frag-sep {
+  opacity: 0.55;
+}
+
+.ytdlp-warn {
+  font-size: 0.85rem;
+  color: #f2c98d;
+  margin: 0;
+}
+
+/* ---- command output ------------------------------------------------------- */
+
+.ytdlp-cmd {
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: #d3f4e0;
+}
+.ytdlp-cmd--sm {
+  font-size: 0.8rem;
+  color: #e9e9ef;
+}
+
+.ytdlp-btn {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  border-radius: 11px;
+  padding: 11px 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  align-self: flex-start;
+  transition: transform 0.1s ease, opacity 0.18s ease, filter 0.18s ease;
+}
+.ytdlp-btn:active {
+  transform: translateY(1px);
+}
+.ytdlp-btn--sm {
+  padding: 8px 14px;
+  font-size: 0.78rem;
+  border-radius: 9px;
+}
+.ytdlp-btn-copy {
+  background: var(--surface-raised);
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset;
+}
+.ytdlp-btn-copy:hover:not(:disabled) {
+  background: #222226;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+.ytdlp-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ---- collapsible help ----------------------------------------------------- */
+
+.ytdlp-help {
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.02);
+  overflow: hidden;
+}
+.ytdlp-help__summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: background 0.18s ease;
+}
+.ytdlp-help__summary::-webkit-details-marker {
+  display: none;
+}
+.ytdlp-help__summary:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+.ytdlp-help__chevron {
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+  opacity: 0.7;
+  transition: transform 0.2s ease;
+}
+.ytdlp-help[open] .ytdlp-help__chevron {
+  transform: rotate(180deg);
+}
+.ytdlp-help__body {
+  padding: 4px 20px 22px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ytdlp-os {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  margin: 16px 0 4px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.3);
+}
+.ytdlp-os__btn {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: #fff;
+  font-size: 0.8rem;
+  padding: 6px 15px;
+  border-radius: 999px;
+  transition: background 0.18s ease;
+}
+.ytdlp-os__btn.is-active {
+  background: rgba(242, 152, 212, 0.22);
+}
+
+.ytdlp-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-left: 0;
+  list-style: none;
+  margin: 18px 0 0;
+}
+.ytdlp-step__title {
+  display: block;
+  font-weight: 600;
+  font-size: 0.92rem;
+  margin-bottom: 9px;
+  color: #f298d4;
+}
+.ytdlp-step__hint {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  opacity: 0.88;
+}
+
+/* ---- install command rows ------------------------------------------------- */
+
+.ytdlp-cmd-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.ytdlp-cmd-row {
+  display: flex;
+  align-items: stretch;
+  gap: 9px;
+}
+.ytdlp-cmd-row .ytdlp-cmd {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+.ytdlp-cmd-row .ytdlp-btn {
+  align-self: stretch;
+  white-space: nowrap;
+}
+
+@media (max-width: 520px) {
+  .ytdlp-cmd-row {
+    flex-direction: column;
+  }
+  .ytdlp-cmd-row .ytdlp-btn {
+    align-self: flex-start;
+  }
+}

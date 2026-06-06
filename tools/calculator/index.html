@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Калькулятор предметов Minecraft: стаки, шалкеры, визуализация и оценка в алмазах."
+    />
+    <title>Калькулятор предметов · PepoHUI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
+    <link rel="stylesheet" href="/src/styles/main.css" />
+    <script>
+      (function () {
+        try {
+          if (sessionStorage.getItem("ppl:welcome-done") === "1") {
+            document.documentElement.classList.add("ppl-skip-welcome");
+          }
+        } catch (_) {}
+      })();
+    </script>
+  </head>
+  <body class="is-loading">
+    <div id="page-loader" class="page-loader" aria-busy="true" aria-live="polite">
+      <div class="page-loader__grid" aria-hidden="true"></div>
+      <div class="page-loader__frame" aria-hidden="true">
+        <span></span><span></span><span></span><span></span>
+      </div>
+      <div class="page-loader__inner">
+        <div class="page-loader__mark">◆</div>
+        <div class="page-loader__brand">PepoHUI</div>
+        <div class="page-loader__line" aria-hidden="true"></div>
+        <div class="page-loader__sub">ppl</div>
+      </div>
+    </div>
+    <div class="noise" aria-hidden="true"></div>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="logo" href="../../">
+          <span class="logo__mark">◆</span>
+          <span class="logo__text">PepoHUI</span>
+        </a>
+        <a class="header-repo-link" href="https://github.com/PepoHUI/ppl" target="_blank" rel="noopener noreferrer">
+          <span class="header-repo-link__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M12 .5a12 12 0 0 0-3.79 23.39c.6.11.82-.26.82-.58v-2.02c-3.34.73-4.04-1.61-4.04-1.61-.55-1.38-1.33-1.75-1.33-1.75-1.09-.74.08-.73.08-.73 1.2.08 1.83 1.24 1.83 1.24 1.07 1.83 2.81 1.3 3.49.99.11-.78.42-1.3.76-1.6-2.67-.31-5.48-1.34-5.48-5.95 0-1.31.47-2.38 1.23-3.22-.12-.31-.53-1.55.12-3.23 0 0 1.01-.32 3.3 1.23a11.4 11.4 0 0 1 6.01 0c2.29-1.55 3.29-1.23 3.29-1.23.66 1.68.25 2.92.13 3.23.76.84 1.22 1.91 1.22 3.22 0 4.62-2.82 5.64-5.5 5.94.43.38.82 1.13.82 2.27v3.37c0 .32.21.7.83.58A12 12 0 0 0 12 .5Z"
+              />
+            </svg>
+          </span>
+          <span class="header-repo-link__text">pepohui/ppl</span>
+        </a>
+        <a class="badge badge--faq" href="../../faq/">
+          <span class="badge-faq__shine" aria-hidden="true"></span>
+          <span class="badge-faq__body">
+            <span class="badge-faq__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.75" />
+                <path
+                  d="M9.75 9.75a2.25 2.25 0 0 1 3.82 1.59c0 1.2-.6 1.76-1.1 2.23-.33.3-.55.57-.55 1.06V15"
+                  stroke="currentColor"
+                  stroke-width="1.75"
+                  stroke-linecap="round"
+                />
+                <path d="M12 17.25v.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              </svg>
+            </span>
+            <span class="badge-faq__label">FAQ</span>
+          </span>
+        </a>
+      </div>
+    </header>
+
+    <article class="tool-page calc-page">
+      <a class="back-link" href="../../">← На главную</a>
+      <h1 class="tool-page__title">Калькулятор предметов</h1>
+      <p class="tool-page__intro">
+        Пересчёт в стаки и шалкер-боксы (27 слотов), наглядная сетка и оценка стоимости в алмазах или алмазных блоках. Всё
+        считается у вас в браузере, без отправки данных на сервер.
+      </p>
+
+      <div class="calc-layout">
+        <aside class="calc-layout__aside" aria-label="Параметры">
+          <div class="panel calc-panel">
+            <section class="calc-section">
+              <h2 class="calc-section__title">Режим и объём</h2>
+              <p class="calc-section__lead">
+                Сначала выберите, как задавать количество: одним числом или вручную стаками и шалкерами.
+              </p>
+
+              <div class="calc-mode-bar" role="tablist" aria-label="Режим ввода">
+                <button type="button" class="calc-mode-btn calc-mode-btn--active" data-mode="total" role="tab" aria-selected="true">
+                  Одно число
+                </button>
+                <button type="button" class="calc-mode-btn" data-mode="separate" role="tab" aria-selected="false">
+                  Стаки и шалкеры
+                </button>
+              </div>
+
+              <form id="itemCalcForm" autocomplete="off">
+                <div class="calc-field">
+                  <label class="field-label" for="stackSize">Размер стака</label>
+                  <select id="stackSize" class="calc-select">
+                    <option value="64">64 — обычные предметы</option>
+                    <option value="16">16 — снежки, яйца, жемчуг…</option>
+                  </select>
+                </div>
+
+                <div id="totalMode" class="calc-input-mode active">
+                  <div class="calc-field">
+                    <label class="field-label" for="itemCount">Всего предметов</label>
+                    <input type="number" id="itemCount" min="1" value="1" required />
+                  </div>
+                </div>
+
+                <div id="separateMode" class="calc-input-mode" style="display: none">
+                  <div class="calc-field-row">
+                    <div class="calc-field calc-field--grow">
+                      <label class="field-label" for="stacksCount">Стаков</label>
+                      <input type="number" id="stacksCount" min="0" value="0" />
+                    </div>
+                    <div class="calc-field calc-field--grow">
+                      <label class="field-label" for="shulkersCount">Шалкеров</label>
+                      <input type="number" id="shulkersCount" min="0" value="0" />
+                    </div>
+                  </div>
+                  <div class="calc-field">
+                    <label class="field-label" for="extraItems">Сверху, штук не в стаке</label>
+                    <input type="number" id="extraItems" min="0" value="0" />
+                  </div>
+                </div>
+
+                <button type="submit" class="btn btn--primary calc-submit">Посчитать</button>
+              </form>
+            </section>
+
+            <section class="calc-section calc-section--last" id="priceCalcSection" aria-labelledby="calc-price-heading">
+              <h2 class="calc-section__title" id="calc-price-heading">Оценка в алмазах</h2>
+              <p class="calc-section__lead">
+                Задайте цену за выбранную единицу (стак, шалкер…). Итог появится после основного расчёта, когда справа уже
+                есть число предметов.
+              </p>
+
+              <div class="calc-field">
+                <label class="field-label" for="priceUnit">За что цена</label>
+                <select id="priceUnit" class="calc-select">
+                  <option value="1">1 штука</option>
+                  <option value="16">Стак ×16</option>
+                  <option value="64" selected>Стак ×64</option>
+                  <option value="432">Шалкер ×16 (432 шт.)</option>
+                  <option value="1728">Шалкер ×64 (1728 шт.)</option>
+                  <option value="custom">Своё число предметов</option>
+                </select>
+              </div>
+
+              <div class="calc-field" id="customUnitGroup" style="display: none">
+                <label class="field-label" for="customUnitValue">Предметов в вашей «единице»</label>
+                <input type="number" id="customUnitValue" min="1" value="1" />
+              </div>
+
+              <div class="calc-field-row">
+                <div class="calc-field calc-field--grow">
+                  <label class="field-label" for="priceValue">Цена за единицу</label>
+                  <input type="number" id="priceValue" min="0" step="0.01" value="0" placeholder="0" />
+                </div>
+                <div class="calc-field calc-field--narrow">
+                  <label class="field-label" for="priceCurrency">Валюта</label>
+                  <select id="priceCurrency" class="calc-select">
+                    <option value="diamonds">Алмазы</option>
+                    <option value="blocks">Алм. блоки</option>
+                  </select>
+                </div>
+              </div>
+
+              <button type="button" id="calculatePriceBtn" class="btn btn--ghost calc-price-btn">Посчитать стоимость</button>
+
+              <div id="priceResult" class="calc-price-result">
+                <h3 class="calc-price-result__title">Итог по цене</h3>
+                <div id="priceResultContent"></div>
+              </div>
+            </section>
+          </div>
+        </aside>
+
+        <div class="calc-layout__main">
+          <div class="panel calc-output" id="calcResult" aria-live="polite">
+            <div class="calc-output__head">
+              <h2 class="calc-section__title calc-section__title--inline">Результат</h2>
+              <p class="calc-output__meta">Стак = выбранный размер · шалкер = 27 слотов по полному стаку</p>
+            </div>
+
+            <div id="calcOutputPlaceholder" class="calc-output__placeholder">
+              <div class="calc-output__placeholder-card">
+                <p class="calc-output__placeholder-lead">
+                  Заполните форму слева и нажмите <strong>«Посчитать»</strong>.
+                </p>
+                <ol class="calc-output__hint-list">
+                  <li>Размер стака 64 или 16 — как в инвентаре Minecraft.</li>
+                  <li>Режим «Стаки и шалкеры» удобен, если вы уже знаете состав.</li>
+                  <li>Сетка шалкера появится здесь, если в расчёте есть хотя бы один шалкер или остаток.</li>
+                </ol>
+              </div>
+            </div>
+
+            <div id="calcOutputInner" class="calc-output__inner" hidden>
+              <div class="calc-stat-grid">
+                <div class="calc-stat-card">
+                  <span class="calc-stat-card__label">Всего предметов</span>
+                  <span class="calc-stat-card__value" id="resultTotal">0</span>
+                </div>
+                <div class="calc-stat-card">
+                  <span class="calc-stat-card__label">Стаки (<span id="resultStackSize">64</span>)</span>
+                  <span class="calc-stat-card__value calc-stat-card__value--small" id="resultStacks">0</span>
+                </div>
+                <div class="calc-stat-card">
+                  <span class="calc-stat-card__label">Шалкеры (27×<span id="resultStackSize2">64</span>)</span>
+                  <span class="calc-stat-card__value calc-stat-card__value--small" id="resultShulkers">0</span>
+                </div>
+              </div>
+
+              <div class="calc-viz" id="calcVisualization" hidden>
+                <h3 class="calc-viz__title">Сетка шалкеров</h3>
+                <p class="calc-viz__lead">Каждая ячейка — один стак; наведите на стак или на коробку для подсказки.</p>
+                <div id="visualizationContent" class="calc-viz__content"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <script type="module" src="/src/scripts/calculator.js"></script>
+  </body>
+</html>
