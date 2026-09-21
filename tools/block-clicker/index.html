@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="BlockClicker — ADHD-friendly кликер: кузница улучшений, Pixi-частицы, комбо-ритм и эскалация VFX. Без сохранения прогресса."
+      content="BlockClicker: кликер с кузницей улучшений и комбо-ритмом. Прогресс сохраняется в браузере."
     />
     <title>BlockClicker · PepoHUI</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -16,6 +16,7 @@
     />
     <link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
     <link rel="stylesheet" href="/src/styles/main.css" />
+    <link rel="stylesheet" href="/src/styles/block-clicker.css" />
     <script>
       (function () {
         try {
@@ -81,8 +82,8 @@
       <a class="back-link" href="../../">← На главную</a>
       <h1 class="tool-page__title">BlockClicker</h1>
       <p class="tool-page__intro">
-        Кузница усилений, ритм-комбо и хаос Текстуры из
-        <a href="../block-palette-mixer/">Block palette mixer</a>. Прогресс не сохраняется — только в этой сессии.
+        Ломайте блоки, покупайте улучшения в кузнице, держите ритм ради комбо. Текстуры из
+        <a href="../block-palette-mixer/">Block palette mixer</a>. Прогресс сохраняется в браузере.
       </p>
 
       <div class="bc-toolbar">
@@ -91,99 +92,98 @@
 
       <div class="bc-app" id="bc-app" data-tier="0">
         <div class="bc-bg" aria-hidden="true">
-          <span class="bc-bg__grid"></span>
-          <span class="bc-bg__orb bc-bg__orb--a"></span>
-          <span class="bc-bg__orb bc-bg__orb--b"></span>
           <span class="bc-bg__biome" id="bc-biome"></span>
         </div>
 
-        <div class="bc-event-banner" id="bc-event-banner" hidden></div>
-
-        <header class="bc-hud">
-          <div class="bc-hud__stat bc-hud__stat--coins">
-            <span class="bc-hud__label">Монеты</span>
-            <span class="bc-hud__value" id="bc-coins">0</span>
-            <span class="bc-hud__pulse" aria-hidden="true"></span>
-          </div>
-          <div class="bc-hud__stat">
-            <span class="bc-hud__label">Сила</span>
-            <span class="bc-hud__value" id="bc-power">1</span>
-          </div>
-          <div class="bc-hud__stat">
-            <span class="bc-hud__label">Комбо</span>
-            <span class="bc-hud__value" id="bc-combo">—</span>
-          </div>
-          <div class="bc-hud__stat">
-            <span class="bc-hud__label">Сломано</span>
-            <span class="bc-hud__value" id="bc-broken">0</span>
-          </div>
-          <div class="bc-hud__anticipation" id="bc-anticipation" hidden>
-            <span class="bc-hud__anticipation-label">До открытия</span>
-            <div class="bc-hud__anticipation-bar">
-              <span class="bc-hud__anticipation-fill" id="bc-anticipation-fill"></span>
-            </div>
-            <span class="bc-hud__anticipation-text" id="bc-anticipation-text"></span>
-          </div>
-        </header>
-
         <div class="bc-main">
-          <section class="bc-stage" aria-label="Игровое поле">
-            <div class="bc-world" id="bc-world">
-              <canvas class="bc-vfx" id="bc-vfx" aria-hidden="true"></canvas>
+          <div class="bc-main__left">
+            <div class="bc-event-banner" id="bc-event-banner" role="status" aria-live="polite" hidden></div>
 
-              <div class="bc-arena" id="bc-arena">
-                <span class="bc-arena__glow" aria-hidden="true"></span>
-                <span class="bc-arena__scan" aria-hidden="true"></span>
-
-                <div class="bc-layer bc-layer--conveyor" id="bc-conveyor" aria-hidden="true"></div>
-                <div
-                  class="bc-layer bc-layer--golem"
-                  id="bc-golem"
-                  aria-hidden="true"
-                  title="Добывает блоки без усталости."
-                  aria-label="Добывает блоки без усталости."
-                >
-                  <span class="bc-golem__phase" aria-hidden="true"></span>
-                  <span class="bc-golem__body"></span>
-                  <span class="bc-golem__eye"></span>
-                  <span class="bc-golem__zzz" aria-hidden="true">z</span>
-                </div>
-                <div class="bc-layer bc-layer--beacon" id="bc-beacon" aria-hidden="true"></div>
-                <div class="bc-fx bc-fx--storm" id="bc-fx-storm" aria-hidden="true"></div>
-                <div class="bc-fx bc-fx--treasure" id="bc-fx-treasure" aria-hidden="true"></div>
-                <div class="bc-fx bc-fx--tnt" id="bc-fx-tnt" aria-hidden="true"></div>
-
-                <div class="bc-arena__body">
-                <div class="bc-rhythm" id="bc-rhythm" aria-label="Ритм-полоска">
-                  <div class="bc-rhythm__track">
-                    <span class="bc-rhythm__zone" id="bc-rhythm-zone"></span>
-                    <span class="bc-rhythm__marker" id="bc-rhythm-marker"></span>
-                  </div>
-                </div>
-
-                <div class="bc-play-zone">
-                <button type="button" class="bc-block-hit" id="bc-block-hit" aria-label="Кликнуть по блоку">
-                  <span class="bc-block-hit__pick-glow" id="bc-pick-glow" aria-hidden="true"></span>
-                  <div class="bc-hp">
-                    <div class="bc-hp__track">
-                      <div class="bc-hp__fill" id="bc-hp-fill"></div>
-                      <div class="bc-hp__cracks" id="bc-hp-cracks" aria-hidden="true"></div>
-                    </div>
-                    <span class="bc-hp__text" id="bc-hp-text">0 / 0</span>
-                  </div>
-                  <span class="bc-block-hit__tex-wrap">
-                    <img class="bc-block-hit__tex" id="bc-block-img" src="" alt="" width="96" height="96" />
-                  </span>
-                  <span class="bc-block-hit__name" id="bc-block-name"></span>
-                </button>
-                </div>
-
-                </div>
+            <header class="bc-hud">
+              <div class="bc-hud__stat bc-hud__stat--coins">
+                <span class="bc-hud__label">Монеты</span>
+                <span class="bc-hud__value" id="bc-coins">0</span>
               </div>
+              <div class="bc-hud__stat">
+                <span class="bc-hud__label">Сила</span>
+                <span class="bc-hud__value" id="bc-power">1</span>
+              </div>
+              <div class="bc-hud__stat">
+                <span class="bc-hud__label">Комбо</span>
+                <span class="bc-hud__value" id="bc-combo">—</span>
+              </div>
+              <div class="bc-hud__stat" id="bc-auto-stat" hidden>
+                <span class="bc-hud__label">Авто</span>
+                <span class="bc-hud__value" id="bc-auto">0/с</span>
+              </div>
+              <div class="bc-hud__stat">
+                <span class="bc-hud__label">Сломано</span>
+                <span class="bc-hud__value" id="bc-broken">0</span>
+              </div>
+              <div class="bc-hud__anticipation" id="bc-anticipation" hidden>
+                <span class="bc-hud__anticipation-label">До открытия</span>
+                <div class="bc-hud__anticipation-bar">
+                  <span class="bc-hud__anticipation-fill" id="bc-anticipation-fill"></span>
+                </div>
+                <span class="bc-hud__anticipation-text" id="bc-anticipation-text"></span>
+              </div>
+            </header>
+            <section class="bc-stage" aria-label="Игровое поле">
+              <div class="bc-world" id="bc-world">
+                <canvas class="bc-vfx" id="bc-vfx" aria-hidden="true"></canvas>
 
-              <div class="bc-floats" id="bc-floats" aria-hidden="true"></div>
-            </div>
-          </section>
+                <div class="bc-arena" id="bc-arena">
+
+                  <div class="bc-layer bc-layer--conveyor" id="bc-conveyor" aria-hidden="true"></div>
+                  <div
+                    class="bc-layer bc-layer--golem"
+                    id="bc-golem"
+                    aria-hidden="true"
+                    title="Добывает блоки без усталости."
+                    aria-label="Добывает блоки без усталости."
+                  >
+                    <span class="bc-golem__phase" aria-hidden="true"></span>
+                    <span class="bc-golem__body"></span>
+                    <span class="bc-golem__eye"></span>
+                    <span class="bc-golem__zzz" aria-hidden="true">z</span>
+                  </div>
+                  <div class="bc-layer bc-layer--beacon" id="bc-beacon" aria-hidden="true"></div>
+                  <div class="bc-fx bc-fx--storm" id="bc-fx-storm" aria-hidden="true"></div>
+                  <div class="bc-fx bc-fx--treasure" id="bc-fx-treasure" aria-hidden="true"></div>
+                  <div class="bc-fx bc-fx--tnt" id="bc-fx-tnt" aria-hidden="true"></div>
+
+                  <div class="bc-arena__body">
+                  <div class="bc-rhythm" id="bc-rhythm" aria-label="Ритм-полоска">
+                    <div class="bc-rhythm__track">
+                      <span class="bc-rhythm__zone" id="bc-rhythm-zone"></span>
+                      <span class="bc-rhythm__marker" id="bc-rhythm-marker"></span>
+                    </div>
+                  </div>
+
+                  <div class="bc-play-zone">
+                  <button type="button" class="bc-block-hit" id="bc-block-hit" aria-label="Кликнуть по блоку">
+                    <span class="bc-block-hit__pick-glow" id="bc-pick-glow" aria-hidden="true"></span>
+                    <div class="bc-hp">
+                      <div class="bc-hp__track">
+                        <div class="bc-hp__fill" id="bc-hp-fill"></div>
+                        <div class="bc-hp__cracks" id="bc-hp-cracks" aria-hidden="true"></div>
+                      </div>
+                      <span class="bc-hp__text" id="bc-hp-text">0 / 0</span>
+                    </div>
+                    <span class="bc-block-hit__tex-wrap">
+                      <img class="bc-block-hit__tex" id="bc-block-img" src="" alt="" width="96" height="96" />
+                    </span>
+                    <span class="bc-block-hit__name" id="bc-block-name"></span>
+                  </button>
+                  </div>
+
+                  </div>
+                </div>
+
+                <div class="bc-floats" id="bc-floats" aria-hidden="true"></div>
+              </div>
+            </section>
+          </div>
 
           <aside class="bc-workshop panel" aria-label="Кузница улучшений">
             <header class="bc-workshop__head">
@@ -192,7 +192,6 @@
             </header>
             <p class="bc-forge-hint">Пробел для покупки</p>
             <div class="bc-forge" id="bc-forge">
-              <svg class="bc-forge__wires" id="bc-forge-wires" aria-hidden="true"></svg>
               <div class="bc-forge__nodes" id="bc-forge-nodes"></div>
             </div>
           </aside>

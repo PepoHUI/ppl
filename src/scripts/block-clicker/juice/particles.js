@@ -1,4 +1,3 @@
-import { Application, Container, Graphics } from "pixi.js";
 import { progressVfxScale } from "../core/economy.js";
 
 const reduced =
@@ -7,123 +6,121 @@ const reduced =
 
 const MAX_PARTICLES = 140;
 
+const cssColor = (n) => "#" + n.toString(16).padStart(6, "0");
+
 export class ParticleEngine {
   constructor(canvas) {
     this.canvas = canvas;
-    this.app = null;
-    this.layer = null;
-    this.gfx = null;
+    this.ctx = null;
+    this.w = 0;
+    this.h = 0;
     this.particles = [];
     this.ambientTimer = 0;
     this.ready = false;
     this.tabPaused = false;
+    this.rafId = 0;
+    this.lastFrame = 0;
+    this.loop = this.loop.bind(this);
   }
 
   async init() {
     if (reduced || !this.canvas) return;
-
-    const parent = this.canvas.parentElement;
-    const w = parent?.clientWidth ?? 400;
-    const h = parent?.clientHeight ?? 400;
-
-    this.app = new Application();
-    await this.app.init({
-      canvas: this.canvas,
-      width: w,
-      height: h,
-      backgroundAlpha: 0,
-      antialias: false,
-      resolution: Math.min(1.5, window.devicePixelRatio || 1),
-      autoDensity: true,
-    });
-
-    this.layer = new Container();
-    this.gfx = new Graphics();
-    this.layer.addChild(this.gfx);
-    this.app.stage.addChild(this.layer);
+    this.ctx = this.canvas.getContext("2d");
+    if (!this.ctx) return;
+    this.resize();
     this.ready = true;
-
-    this.app.ticker.add(() => this.tick());
-    this.app.ticker.stop();
-    window.addEventListener("resize", () => this.resize());
+    const parent = this.canvas.parentElement;
+    if (parent && typeof ResizeObserver !== "undefined") {
+      new ResizeObserver(() => this.resize()).observe(parent);
+    } else {
+      window.addEventListener("resize", () => this.resize());
+    }
   }
 
   resize() {
-    if (!this.app || !this.canvas.parentElement) return;
-    const { clientWidth: w, clientHeight: h } = this.canvas.parentElement;
-    this.app.renderer.resize(w, h);
+    const parent = this.canvas?.parentElement;
+    if (!parent) return;
+    const dpr = Math.min(1.5, window.devicePixelRatio || 1);
+    this.w = parent.clientWidth;
+    this.h = parent.clientHeight;
+    this.canvas.width = Math.round(this.w * dpr);
+    this.canvas.height = Math.round(this.h * dpr);
+    this.ctx?.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
   vfxScale() {
     return progressVfxScale();
   }
 
-  wakeTicker() {
-    if (!this.app || reduced || this.tabPaused) return;
-    this.app.ticker.start();
-  }
-
-  sleepTickerIfIdle() {
-    if (this.particles.length === 0 && this.app) {
-      this.app.ticker.stop();
-    }
+  wake() {
+    if (!this.ready || this.tabPaused || this.rafId) return;
+    this.lastFrame = performance.now();
+    this.rafId = requestAnimationFrame(this.loop);
   }
 
   pause() {
     this.tabPaused = true;
-    this.app?.ticker.stop();
+    if (this.rafId) cancelAnimationFrame(this.rafId);
+    this.rafId = 0;
   }
 
   resume() {
     this.tabPaused = false;
-    if (this.particles.length > 0) this.wakeTicker();
-  }
-
-  trimParticles() {
-    if (this.particles.length > MAX_PARTICLES) {
-      this.particles.splice(0, this.particles.length - MAX_PARTICLES);
-    }
+    if (this.particles.length > 0) this.wake();
   }
 
   pushParticle(p) {
     this.particles.push(p);
-    this.trimParticles();
-    this.wakeTicker();
+    if (this.particles.length > MAX_PARTICLES) {
+      this.particles.splice(0, this.particles.length - MAX_PARTICLES);
+    }
+    this.wake();
   }
 
-  tick() {
-    if (!this.app || this.tabPaused) return;
+  loop(now) {
+    this.rafId = 0;
+    if (this.tabPaused || !this.ready) return;
+    const dt = Math.min(0.05, (now - this.lastFrame) / 1000);
+    this.lastFrame = now;
+    this.step(dt);
+    if (this.particles.length > 0) this.rafId = requestAnimationFrame(this.loop);
+  }
+
+  step(dt) {
     const scale = this.vfxScale();
-    const dt = this.app.ticker.deltaMS / 1000;
     this.ambientTimer += dt;
-    const ambientInterval = 0.55 - scale * 0.2;
-    if (this.ambientTimer > ambientInterval) {
+    if (this.ambientTimer > 0.55 - scale * 0.2) {
       this.ambientTimer = 0;
       if (scale > 0.12) this.ambient(Math.max(1, Math.floor(scale * 4)));
     }
 
+    let alive = 0;
     for (const p of this.particles) {
       p.life -= dt;
+      if (p.life <= 0) continue;
       p.vy += (p.g ?? 120) * dt;
       p.x += p.vx * dt;
       p.y += p.vy * dt;
       p.vx *= 0.98;
+      this.particles[alive++] = p;
     }
-    this.particles = this.particles.filter((p) => p.life > 0);
+    this.particles.length = alive;
 
-    this.gfx?.clear();
+    const ctx = this.ctx;
+    ctx.clearRect(0, 0, this.w, this.h);
     for (const p of this.particles) {
       const alpha = Math.min(1, p.life / p.max);
-      this.gfx?.circle(p.x, p.y, p.size * alpha);
-      this.gfx?.fill({ color: p.color, alpha: alpha * 0.9 });
+      ctx.globalAlpha = alpha * 0.9;
+      ctx.fillStyle = p.css;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, Math.max(0.1, p.size * alpha), 0, Math.PI * 2);
+      ctx.fill();
     }
-
-    this.sleepTickerIfIdle();
+    ctx.globalAlpha = 1;
   }
 
   center() {
-    if (!this.app) return { x: this.app.screen.width / 2, y: this.app.screen.height / 2 };
-    return { x: 200, y: 200 };
+    return { x: this.w / 2 || 200, y: this.h / 2 || 200 };
   }
 
   burst(x, y, opts = {}) {
@@ -148,24 +145,24 @@ export class ParticleEngine {
         life: life * (0.7 + Math.random() * 0.5),
         max: life,
         size: size * (0.6 + Math.random()),
-        color: colors[Math.floor(Math.random() * colors.length)],
+        css: cssColor(colors[Math.floor(Math.random() * colors.length)]),
         g: 180,
       });
     }
   }
 
   ambient(n = 3) {
-    if (!this.ready || reduced || !this.app || this.tabPaused) return;
+    if (!this.ready || reduced || this.tabPaused) return;
     for (let i = 0; i < n; i++) {
       this.pushParticle({
-        x: Math.random() * this.app.screen.width,
-        y: this.app.screen.height + 10,
+        x: Math.random() * this.w,
+        y: this.h + 10,
         vx: (Math.random() - 0.5) * 20,
         vy: -30 - Math.random() * 50,
         life: 2 + Math.random() * 2,
         max: 2,
         size: 2,
-        color: 0x64748b,
+        css: cssColor(0x64748b),
         g: -5,
       });
     }
@@ -216,26 +213,26 @@ export class ParticleEngine {
         life: 0.35,
         max: 0.35,
         size: 2,
-        color: 0xfde68a,
+        css: cssColor(0xfde68a),
         g: 0,
       });
     }
   }
 
   treasureRain() {
-    if (!this.app) return;
+    if (!this.ready) return;
     const scale = this.vfxScale();
     const n = Math.floor(15 + scale * 25);
     for (let i = 0; i < n; i++) {
       this.pushParticle({
-        x: Math.random() * this.app.screen.width,
+        x: Math.random() * this.w,
         y: -10,
         vx: (Math.random() - 0.5) * 60,
         vy: 80 + Math.random() * 120,
         life: 1.5 + Math.random(),
         max: 1.5,
         size: 3,
-        color: 0xfbbf24,
+        css: cssColor(0xfbbf24),
         g: 40,
       });
     }

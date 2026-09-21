@@ -414,19 +414,6 @@ function clearLines() {
   return { cleared, isAllClear };
 }
 
-function hardDrop() {
-  if (!active || paused || gameOver || !running) return;
-  while (!collides(active, 0, 1, active.rot)) {
-    active.y++;
-    score += 2;
-  }
-  active.renderY = active.y;
-  active.renderX = active.x;
-  const prev = score;
-  lockPiece();
-  animateScore(scoreEl, prev, score);
-}
-
 function move(dx) {
   if (!active || paused || gameOver || !running) return;
   if (!collides(active, dx, 0, active.rot)) {

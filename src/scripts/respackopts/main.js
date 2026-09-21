@@ -18,7 +18,7 @@ const model = {
 
 let step = 1;
 let optionSeq = 0;
-let selectedTarget = null; // { path, isDir }
+let selectedTarget = null;
 let currentLang = "en_us";
 
 const $ = (id) => document.getElementById(id);
@@ -79,8 +79,6 @@ function goStep(n) {
   if (step === 5) renderSummary();
 }
 
-// ---- step 1: upload -------------------------------------------------------
-
 async function acceptZip(file) {
   if (!file) return;
   try {
@@ -132,8 +130,6 @@ async function acceptZip(file) {
     info.textContent = "Не удалось прочитать zip: " + (e instanceof Error ? e.message : String(e));
   }
 }
-
-// ---- step 2: options ------------------------------------------------------
 
 function addOption() {
   optionSeq += 1;
@@ -213,8 +209,6 @@ function typeSpecific(opt) {
   }
   return box;
 }
-
-// ---- step 3: toggles ------------------------------------------------------
 
 function treeNodes() {
   const folders = new Set();
@@ -394,8 +388,6 @@ function clauseRow(cl, index, opts) {
   return row;
 }
 
-// ---- step 4: translations -------------------------------------------------
-
 function renderLang() {
   $("rpoLangTabs").querySelectorAll(".rpo-langtab").forEach((b) =>
     b.classList.toggle("is-active", b.dataset.lang === currentLang));
@@ -419,8 +411,6 @@ function renderLang() {
     table.appendChild(row);
   }
 }
-
-// ---- step 5: export -------------------------------------------------------
 
 function renderSummary() {
   const valid = model.options.every((o, i) =>
@@ -452,8 +442,6 @@ async function doExport() {
     err.textContent = "Ошибка экспорта: " + (e instanceof Error ? e.message : String(e));
   }
 }
-
-// ---- small DOM helpers ----------------------------------------------------
 
 function field(labelText, control) {
   const f = document.createElement("label");

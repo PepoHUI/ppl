@@ -1,21 +1,32 @@
 import { game, lvl, hasUnlock } from "./state.js";
-import { golemCps } from "./golem.js";
+import { golemCps, golemAverageCps, GOLEM_AUTO_DAMAGE_MULT } from "./golem.js";
 import {
   upgradeHpMultiplier,
   upgradeRewardMultiplier,
   upgradeDamageBonus,
   totalForgeLevels,
-  nextUpgradeCost,
   isConveyorMaxed,
 } from "./upgrades.js";
 
 export const HP_TIER_MULTS = [10, 25];
 
+export const HP_TIER_CHANCE = 0.12;
+
+export const HP_TIER_LOW_SHARE = 0.65;
+
 export const HP_TIER_TIMEOUT_MS = 10_000;
 
 export const MIN_BREAK_REWARD = 8;
 
-export const UPGRADE_BREAK_BONUS_RATE = 0.054;
+export const REWARD_GROWTH = 1.5;
+
+export const HP_TIER_REWARD_MULT = 1.2;
+
+export const OFFLINE_EFFICIENCY = 0.5;
+
+export const OFFLINE_CAP_MS = 8 * 60 * 60 * 1000;
+
+export const OFFLINE_MIN_MS = 60_000;
 
 const NUM_SUFFIXES = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No"];
 
@@ -85,33 +96,76 @@ export function comboDecayMs() {
   return 650 + lvl("rhythm") * 140 + (hasUnlock("rhythmRing") ? 200 : 0);
 }
 
-export function rewardForBreak(combo) {
-  const cur = game.current;
-  if (!cur) return 0;
+export function baseBreakReward() {
+  return MIN_BREAK_REWARD * REWARD_GROWTH ** totalForgeLevels();
+}
 
+export function rewardFor(cur, combo) {
   const comboMult = 1 + combo * (0.15 + lvl("rhythm") * 0.04);
   const goldenMult = cur.golden ? 6 : 1;
   const luckyMult = cur.lucky ? 12 : 1;
-  const scaledBase = Math.floor(
-    MIN_BREAK_REWARD * coinMultiplier() * comboMult * goldenMult * luckyMult * upgradeRewardMultiplier(),
+  const tier = cur.hpTier ?? 1;
+  const tierMult = hasHpTierModifier(tier) ? tier * HP_TIER_REWARD_MULT : 1;
+  const reward = Math.floor(
+    baseBreakReward() * coinMultiplier() * comboMult * goldenMult * luckyMult * tierMult * upgradeRewardMultiplier(),
   );
-  const upgradeBonus = Math.floor(nextUpgradeCost() * UPGRADE_BREAK_BONUS_RATE);
-  const tierBonus = hpTierCoinReward(cur.hpTier ?? 1);
-  return Math.max(MIN_BREAK_REWARD, scaledBase) + upgradeBonus + tierBonus;
+  return Math.max(MIN_BREAK_REWARD, reward);
+}
+
+export function rewardForBreak(combo) {
+  const cur = game.current;
+  return cur ? rewardFor(cur, combo) : 0;
+}
+
+function tierFactors() {
+  if (!isConveyorMaxed()) return { hp: 1, reward: 1 };
+  const [low, high] = HP_TIER_MULTS;
+  const avgTier = HP_TIER_LOW_SHARE * low + (1 - HP_TIER_LOW_SHARE) * high;
+  return {
+    hp: 1 - HP_TIER_CHANCE + HP_TIER_CHANCE * avgTier,
+    reward: 1 - HP_TIER_CHANCE + HP_TIER_CHANCE * avgTier * HP_TIER_REWARD_MULT,
+  };
+}
+
+function averageBlockHp(b) {
+  const min = 4 + Math.floor(b / 18);
+  const max = 9 + Math.floor(b / 8);
+  let hp = (min + max) / 2;
+  if (hasUnlock("tnt")) hp = Math.max(2, hp * (1 - lvl("tnt") * 0.04));
+  return Math.max(1, Math.ceil(hp * upgradeHpMultiplier()));
+}
+
+export function offlineEarnings(ms) {
+  const seconds = Math.min(ms, OFFLINE_CAP_MS) / 1000;
+  const cps = conveyorCps() + golemAverageCps();
+  if (seconds <= 0 || cps <= 0) return { coins: 0, blocks: 0 };
+
+  const damage = clickDamage() * (hasUnlock("golem") ? GOLEM_AUTO_DAMAGE_MULT : 1);
+  const tiers = tierFactors();
+  let budget = cps * damage * seconds * OFFLINE_EFFICIENCY;
+  let blocks = 0;
+  while (budget > 0) {
+    const hp = averageBlockHp(game.blocksBroken + blocks) * tiers.hp;
+    const batch = Math.min(
+      Math.floor(budget / hp),
+      Math.max(10, Math.floor((game.blocksBroken + blocks) * 0.01)),
+    );
+    if (batch <= 0) break;
+    blocks += batch;
+    budget -= batch * hp;
+  }
+  const coins = Math.floor(blocks * rewardFor({ golden: false, lucky: false, hpTier: 1 }, 0) * tiers.reward);
+  return { coins, blocks };
 }
 
 export function rollHpTier() {
   if (!isConveyorMaxed()) return 1;
-  if (Math.random() > 0.12) return 1;
-  return Math.random() < 0.65 ? 10 : 25;
+  if (Math.random() > HP_TIER_CHANCE) return 1;
+  return Math.random() < HP_TIER_LOW_SHARE ? HP_TIER_MULTS[0] : HP_TIER_MULTS[1];
 }
 
 export function hasHpTierModifier(tier) {
   return HP_TIER_MULTS.includes(tier);
-}
-
-export function hpTierCoinReward(tier) {
-  return HP_TIER_MULTS.includes(tier) ? tier : 0;
 }
 
 export function rollHp() {

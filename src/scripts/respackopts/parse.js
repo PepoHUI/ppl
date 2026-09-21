@@ -1,6 +1,3 @@
-// Reverse-parse an existing Respackopts pack into the tool's model. Node-testable
-// (pure aside from reading Blob text in parseToggles).
-
 import JSON5 from "json5";
 import { optionRef } from "./model.js";
 
@@ -41,9 +38,6 @@ function collectEntry(key, val, category, options) {
   }
 }
 
-/**
- * Parse an already-decoded respackopts config object.
- */
 export function parseSchemaObject(root) {
   const packId = typeof root.id === "string" ? root.id : "";
   const confVer = Number.isFinite(root.version) ? root.version : undefined;
@@ -54,20 +48,6 @@ export function parseSchemaObject(root) {
   return { packId, confVer, capabilities, options };
 }
 
-/**
- * Parse a respackopts config text (JSON5) into { packId, confVer, capabilities, options }.
- * @param {string} text
- */
-export function parseSchema(text) {
-  return parseSchemaObject(JSON5.parse(text));
-}
-
-/**
- * Locate the Respackopts config anywhere in the pack (root or assets/respackopts/…),
- * validating that it parses and has a `conf` object. Shallower paths win.
- * @param {Map<string, Blob>} files
- * @returns {Promise<({path:string}&ReturnType<typeof parseSchemaObject>)|null>}
- */
 export async function findSchema(files) {
   const re = /(^|\/)(respackopts|conf)\.json5?$/i;
   const candidates = [...files.keys()]
@@ -107,16 +87,9 @@ function parseTerm(part, options, packId) {
   return null;
 }
 
-/**
- * Reverse a μScript condition into { combine, clauses } when it fits the simple
- * grammar, otherwise { raw }.
- * @param {string} condition
- * @param {Array} options
- */
 export function reverseCondition(condition, options, packId) {
   const s = String(condition).trim();
   if (!s) return { raw: s };
-  // characters/constructs the simple builder can't represent
   if (/[()<>=+\-*/%]/.test(s) || /version\s*\(/i.test(s)) return { raw: s };
 
   const hasAmp = s.includes("&");
@@ -142,12 +115,6 @@ function rpoTarget(path) {
   return { isDir: false, targetPath: path.slice(0, -4) };
 }
 
-/**
- * Scan a files Map for *.rpo entries and build toggles.
- * @param {Map<string, Blob>} files
- * @param {Array} options
- * @returns {Promise<Array>}
- */
 export async function parseToggles(files, options, packId) {
   const toggles = [];
   for (const [path, blob] of files) {

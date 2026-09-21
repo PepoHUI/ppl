@@ -3,7 +3,7 @@ import { rewardForBreak } from "../core/economy.js";
 import { getCombo } from "./combo.js";
 import { showBanner, spawnFloat } from "../juice/fx.js";
 import { playJackpot } from "../juice/audio.js";
-import { punch, freezeFrame } from "../juice/camera.js";
+import { punch } from "../juice/camera.js";
 
 let floatLayer = null;
 
@@ -52,7 +52,6 @@ export function triggerJackpot(kind) {
   game.coins += bonus;
   playJackpot();
   punch(world, 3);
-  freezeFrame(app, 150);
   particles?.upgradeCelebration();
   return bonus;
 }

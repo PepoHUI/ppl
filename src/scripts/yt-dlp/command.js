@@ -1,23 +1,11 @@
-// Pure, DOM-free helpers for the yt-dlp tool. Node-importable for testing.
-
 export const QUALITIES = ["Best", "1080", "720", "480", "360"];
 
-/**
- * yt-dlp -S sort string for a quality preset. Always prefers mp4/m4a.
- * @param {string} quality one of QUALITIES
- * @returns {string} value for the -S flag (unquoted)
- */
 export function sortForQuality(quality) {
   return quality === "Best"
     ? "res,ext:mp4:m4a"
     : `res:${quality},ext:mp4:m4a`;
 }
 
-/**
- * Parse a timecode (SS | MM:SS | HH:MM:SS) into seconds.
- * @param {string} value
- * @returns {number|null} seconds, or null if invalid
- */
 export function parseTime(value) {
   const v = String(value ?? "").trim();
   if (!v) return null;
@@ -31,12 +19,6 @@ export function parseTime(value) {
   return seconds;
 }
 
-/**
- * Build the yt-dlp command and any validation errors from form state.
- * @param {{url?:string, quality?:string, folder?:string,
- *          fragment?:{enabled?:boolean, from?:string, to?:string}}} state
- * @returns {{command: string, errors: string[]}}
- */
 export function buildCommand(state = {}) {
   const errors = [];
   const url = String(state.url ?? "").trim();
@@ -72,10 +54,6 @@ export function buildCommand(state = {}) {
   return { command: parts.join(" "), errors };
 }
 
-/**
- * OS-specific preset folders, install commands and console hint.
- * @param {"windows"|"macos"|"linux"} os
- */
 export function osDefaults(os) {
   if (os === "macos") {
     return {
@@ -91,7 +69,6 @@ export function osDefaults(os) {
       console: "Откройте ваш терминал (часто Ctrl+Alt+T)",
     };
   }
-  // windows (default)
   return {
     presets: {
       Downloads: "%USERPROFILE%\\Downloads",
@@ -103,11 +80,6 @@ export function osDefaults(os) {
   };
 }
 
-/**
- * Map a raw platform string to an OS id.
- * @param {string} platform e.g. navigator.platform / userAgentData.platform
- * @returns {"windows"|"macos"|"linux"}
- */
 export function detectOs(platform) {
   const p = String(platform ?? "").toLowerCase();
   if (p.includes("win")) return "windows";

@@ -1,7 +1,7 @@
 import gsap from "gsap";
 import { lvl, hasUnlock } from "../core/state.js";
 import { isOverdriveMaxed } from "../core/upgrades.js";
-import { punch, freezeFrame } from "./camera.js";
+import { punch } from "./camera.js";
 import { playPerfect, playFinale } from "./audio.js";
 import { showBanner } from "./fx.js";
 
@@ -144,10 +144,7 @@ const REVEALS = {
   },
 
   overdrive(ctx) {
-    const { x, y } = center(ctx);
-    freezeFrame(ctx.app, 160);
     ctx.particles?.upgradeCelebration();
-    ctx.app?.classList.add("bc-app--chromatic");
     ctx.arena?.classList.add("bc-arena--overdrive");
     flashArena(ctx.arena, "rgba(167, 139, 250, 0.6)", 0.5);
   },
@@ -175,14 +172,12 @@ export function playOverdriveFinale(ctx) {
   const sub = overlay?.querySelector(".bc-finale__sub");
   const burst = overlay?.querySelector(".bc-finale__burst");
 
-  freezeFrame(app, 280);
   punch(world, 3.5);
   playFinale();
   particles?.finaleBurst();
   flashArena(arena, "rgba(167, 139, 250, 0.65)", 0.55);
 
   app?.classList.add("bc-app--finale");
-  app?.classList.add("bc-app--chromatic");
 
   if (!overlay) {
     setTimeout(() => {

@@ -1,4 +1,5 @@
 import { game } from "../core/state.js";
+import { baseBreakReward } from "../core/economy.js";
 import { hasUnlock } from "../core/state.js";
 import { spawnFloat, showBanner } from "../juice/fx.js";
 import { playJackpot } from "../juice/audio.js";
@@ -11,11 +12,27 @@ let particles = null;
 
 let nextMicro = 0;
 
+const buffExpiry = {};
+
+function setBuff(key, value, ms) {
+  game.buffs[key] = value;
+  buffExpiry[key] = performance.now() + ms;
+}
+
+function expireBuffs(now) {
+  for (const key of Object.keys(buffExpiry)) {
+    if (now >= buffExpiry[key]) {
+      delete game.buffs[key];
+      delete buffExpiry[key];
+    }
+  }
+}
+
 const MICRO_TYPES = [
-  { id: "critBuff", weight: 3, label: "Ярость!", apply: () => { game.buffs.crit = 0.25; setTimeout(() => delete game.buffs.crit, 5000); } },
-  { id: "coinBuff", weight: 3, label: "×2 монеты", apply: () => { game.buffs.coins = 2; setTimeout(() => delete game.buffs.coins, 6000); } },
-  { id: "power", weight: 2, label: "Сила +50%", apply: () => { game.buffs.power = 1.5; setTimeout(() => delete game.buffs.power, 5000); } },
-  { id: "gem", weight: 2, label: "+бонус", apply: () => { game.coins += 15 + Math.floor(game.blocksBroken * 0.5); } },
+  { id: "critBuff", weight: 3, label: "Ярость!", apply: () => setBuff("crit", 0.25, 5000) },
+  { id: "coinBuff", weight: 3, label: "×2 монеты", apply: () => setBuff("coins", 2, 6000) },
+  { id: "power", weight: 2, label: "Сила +50%", apply: () => setBuff("power", 1.5, 5000) },
+  { id: "gem", weight: 2, label: "+бонус", apply: () => { game.coins += Math.floor(baseBreakReward() * 6); } },
 ];
 
 export function initMicro(layer, b, px) {
@@ -26,7 +43,7 @@ export function initMicro(layer, b, px) {
 }
 
 function scheduleNext() {
-  nextMicro = performance.now() + 2000 + Math.random() * 3000;
+  nextMicro = performance.now() + 25_000 + Math.random() * 20_000;
 }
 
 function pickMicro() {
@@ -42,11 +59,12 @@ function pickMicro() {
 }
 
 export function tickMicro(now) {
+  expireBuffs(now);
   if (now < nextMicro) return false;
   scheduleNext();
   const m = pickMicro();
   m.apply();
-  showBanner(banner, m.label, "Микро-бонус");
+  showBanner(banner, m.label, "Микро-бонус", true);
   spawnFloat(floatLayer, m.label, "coin");
   if (!document.hidden) particles?.ambient(6);
   return true;

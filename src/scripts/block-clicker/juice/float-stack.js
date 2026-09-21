@@ -1,4 +1,5 @@
 import gsap from "gsap";
+import { anchorRects } from "./layout-cache.js";
 
 const WINDOW_MS = 1000;
 
@@ -36,8 +37,7 @@ function formatText(b) {
 
 function placeEl(el, anchor, layer) {
   if (anchor && layer) {
-    const ar = anchor.getBoundingClientRect();
-    const lr = layer.getBoundingClientRect();
+    const { ar, lr } = anchorRects(anchor, layer);
     el.style.left = `${ar.left - lr.left + ar.width * (0.38 + Math.random() * 0.18)}px`;
     el.style.top = `${ar.top - lr.top + ar.height * (0.12 + Math.random() * 0.18)}px`;
   } else {

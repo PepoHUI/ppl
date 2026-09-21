@@ -1,7 +1,5 @@
 import {
   canBuyNode,
-  canUnlockNode,
-  prerequisiteNode,
   nextForgeUpgrade,
 } from "../core/upgrades.js";
 import { game } from "../core/state.js";
@@ -24,20 +22,6 @@ function nextUpgradeTarget() {
   const level = game.upgrades[node.id] ?? 0;
   if (level >= node.max) return null;
 
-  if (!canUnlockNode(node)) {
-    const prev = prerequisiteNode(node);
-    if (!prev) return null;
-    const prevLevel = game.upgrades[prev.id] ?? 0;
-    return {
-      kind: "locked",
-      node,
-      prev,
-      prevLevel,
-      prevMax: prev.max,
-      cost,
-    };
-  }
-
   const gap = Math.max(0, cost - game.coins);
   return {
     kind: canBuyNode(node) ? "ready" : "progress",
@@ -59,17 +43,6 @@ export function updateAnticipation() {
 
   wrap.hidden = false;
   wrap.classList.toggle("bc-hud__anticipation--ready", target.kind === "ready");
-
-  if (target.kind === "locked") {
-    const pct = target.prevMax > 0 ? target.prevLevel / target.prevMax : 0;
-    fill.style.width = `${pct * 100}%`;
-    const left = target.prevMax - target.prevLevel;
-    text.textContent =
-      left <= 0
-        ? `Откроется «${target.node.name}»`
-        : `«${target.prev.name}» · осталось ${left} ур.`;
-    return;
-  }
 
   fill.style.width = `${target.pct * 100}%`;
 

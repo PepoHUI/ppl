@@ -78,10 +78,6 @@ export function getCombo() {
   return combo;
 }
 
-export function getMarkerPos() {
-  return markerPos;
-}
-
 export function isPerfectTiming() {
   const { start, width } = zoneLayout();
   return markerPos >= start && markerPos <= start + width;

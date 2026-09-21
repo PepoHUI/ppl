@@ -39,10 +39,6 @@ export function golemPhaseProgress(now = performance.now()) {
   return Math.min(1, (now - phaseStartedAt) / phaseDuration());
 }
 
-export function golemPhaseRemainingMs(now = performance.now()) {
-  return Math.max(0, phaseDuration() - (now - phaseStartedAt));
-}
-
 export function tickGolemCycle(now = performance.now()) {
   if (!hasUnlock("golem")) return false;
 
@@ -55,11 +51,18 @@ export function tickGolemCycle(now = performance.now()) {
   return true;
 }
 
-export function golemCps() {
-  if (!isGolemWorking()) return 0;
-
+function golemBaseCps() {
   let cps = lvl("golem") * 0.9;
   if (hasUnlock("golemAttack")) cps += lvl("golem") * 0.55;
   if (hasUnlock("golemRage")) cps *= 1.35;
   return cps;
+}
+
+export function golemCps() {
+  return isGolemWorking() ? golemBaseCps() : 0;
+}
+
+export function golemAverageCps() {
+  if (!hasUnlock("golem")) return 0;
+  return golemBaseCps() * (GOLEM_WORK_MS / (GOLEM_WORK_MS + GOLEM_REST_MS));
 }

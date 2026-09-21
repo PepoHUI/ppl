@@ -191,6 +191,3 @@ export function celebrateWin(board) {
   );
 }
 
-export function getAnimDuration() {
-  return reduced ? 0 : MOVE_MS * 1000 + 40;
-}

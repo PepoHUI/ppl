@@ -4,8 +4,6 @@ import { frameTimes, framePath } from "./frame-math.js";
 const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 const LARGE_FRAME_WARN = 600;
 
-// ---- video helpers ---------------------------------------------------------
-
 function loadVideo(file) {
   return new Promise((resolve, reject) => {
     const url = URL.createObjectURL(file);
@@ -88,13 +86,6 @@ function triggerDownload(blob, filename) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-// ---- core ------------------------------------------------------------------
-
-/**
- * Build the resource-pack zip from a video file.
- * onProgress({ phase, index, total }) where phase is "extract" | "zip" | "done".
- * @returns {Promise<Blob>}
- */
 export async function buildPackFromVideo(file, onProgress = () => {}) {
   const { mcmeta, icon } = await fetchFixedFiles();
   const { video, url } = await loadVideo(file);
@@ -132,8 +123,6 @@ export async function buildPackFromVideo(file, onProgress = () => {}) {
     video.load();
   }
 }
-
-// ---- DOM wiring ------------------------------------------------------------
 
 function boot() {
   const dropZone = document.getElementById("dropZone");

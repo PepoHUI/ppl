@@ -46,7 +46,6 @@ function boot() {
 
   let currentOs = detectOs(navigator.userAgentData?.platform ?? navigator.platform);
 
-  // restore persisted folder
   folderInput.value = loadFolder();
 
   const readState = () => ({
@@ -110,7 +109,6 @@ function boot() {
     }
   };
 
-  // inputs → live render
   [urlInput, qualitySelect, fragFrom, fragTo].forEach((el) =>
     el.addEventListener("input", render),
   );

@@ -39,7 +39,6 @@ export function syncVisualLayers(app) {
   }
   conveyor?.classList.toggle("bc-layer--active", hasUnlock("conveyor"));
   rhythm?.classList.toggle("bc-rhythm--boost", hasUnlock("rhythmRing"));
-  app.classList.toggle("bc-app--chromatic", hasUnlock("chromatic") || hasUnlock("omega"));
 
   syncUpgradeLayers();
 

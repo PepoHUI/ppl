@@ -8,11 +8,6 @@ export function escalation() {
   return Math.min(1, tier * 0.18 + levels * 0.012 + broken * 0.15 + (hasUnlock("overdrive") ? 0.2 : 0));
 }
 
-export function powerDisplay() {
-  const base = 1 + totalForgeLevels() * 0.35;
-  return Math.floor(base * (1 + escalation()));
-}
-
 export const BIOMES = [
   { id: "void", hue: 220, label: "Пустота" },
   { id: "cave", hue: 200, label: "Пещера" },

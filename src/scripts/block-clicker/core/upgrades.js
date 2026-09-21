@@ -1,12 +1,14 @@
 import { game, lvl, grantUnlock } from "./state.js";
 
-export const FIRST_UPGRADE_COST = 2;
+export const FIRST_UPGRADE_COST = 47000;
 
-export const LEVEL_COST_MULT = 1.575;
+export const EARLY_DISCOUNT_LEVELS = 40;
 
-export const NEXT_NODE_COST_MULT = 1.79;
+export const EARLY_DISCOUNT_POWER = 1.5;
 
-export const HP_LEVEL_MULT = 1.1;
+export const LEVEL_COST_MULT = 1.5;
+
+export const HP_LEVEL_MULT = 1.07;
 
 export const FORGE_DAMAGE_PER_LEVEL = 2.5;
 
@@ -15,10 +17,10 @@ export const FORGE_REWARD_PER_LEVEL = 0.02;
 export const FORGE_NODES = [
   {
     id: "spark",
+    branch: "core",
+    requires: [],
     name: "Искра кирки",
     icon: "⛏",
-    col: 1,
-    row: 0,
     max: 12,
     eventTitle: (l) => `Кирка пылает · ${l}`,
     eventDesc: () => "Удары сильнее, свет ярче",
@@ -32,10 +34,10 @@ export const FORGE_NODES = [
   },
   {
     id: "golem",
+    branch: "auto",
+    requires: [["spark", 5]],
     name: "Голем",
     icon: "🗿",
-    col: 0,
-    row: 1,
     max: 10,
     eventTitle: (l) => `Голем проснулся · ${l}`,
     eventDesc: () => "18 с мощного штурма — сильнее ленты, 6 с отдых",
@@ -47,10 +49,10 @@ export const FORGE_NODES = [
   },
   {
     id: "conveyor",
+    branch: "auto",
+    requires: [["golem", 5]],
     name: "Конвейер",
     icon: "⚙",
-    col: 2,
-    row: 1,
     max: 10,
     eventTitle: (l) => `Лента руды · ${l}`,
     eventDesc: () => "Конвейер качает пассивно",
@@ -61,10 +63,10 @@ export const FORGE_NODES = [
   },
   {
     id: "storm",
+    branch: "click",
+    requires: [["spark", 5]],
     name: "Грозовой стержень",
     icon: "⚡",
-    col: 1,
-    row: 2,
     max: 10,
     eventTitle: (l) => `Молнии · ${l}`,
     eventDesc: () => "Криты и удары бьют током",
@@ -76,10 +78,10 @@ export const FORGE_NODES = [
   },
   {
     id: "rhythm",
+    branch: "click",
+    requires: [["storm", 5]],
     name: "Ритм-ядро",
     icon: "♪",
-    col: 0,
-    row: 3,
     max: 10,
     eventTitle: (l) => `Пульс ритма · ${l}`,
     eventDesc: () => "Шире зелёная зона, больше комбо",
@@ -90,25 +92,11 @@ export const FORGE_NODES = [
     },
   },
   {
-    id: "treasure",
-    name: "Сокровищница",
-    icon: "◎",
-    col: 2,
-    row: 3,
-    max: 10,
-    eventTitle: (l) => `Сундуки · ${l}`,
-    eventDesc: () => "Золотые блоки и дождь монет",
-    milestones: {
-      2: { unlocks: ["chestDrop"] },
-      6: { unlocks: ["treasureRain"] },
-    },
-  },
-  {
     id: "tnt",
+    branch: "click",
+    requires: [["rhythm", 5]],
     name: "TNT-кузня",
     icon: "💥",
-    col: 1,
-    row: 4,
     max: 8,
     eventTitle: (l) => `Цепной взрыв · ${l}`,
     eventDesc: () => "Разрушение рвёт соседние слои",
@@ -118,11 +106,25 @@ export const FORGE_NODES = [
     },
   },
   {
+    id: "treasure",
+    branch: "income",
+    requires: [["spark", 5]],
+    name: "Сокровищница",
+    icon: "◎",
+    max: 10,
+    eventTitle: (l) => `Сундуки · ${l}`,
+    eventDesc: () => "Золотые блоки и дождь монет",
+    milestones: {
+      2: { unlocks: ["chestDrop"] },
+      6: { unlocks: ["treasureRain"] },
+    },
+  },
+  {
     id: "beacon",
+    branch: "income",
+    requires: [["treasure", 5]],
     name: "Маяк силы",
     icon: "◈",
-    col: 0,
-    row: 5,
     max: 8,
     eventTitle: (l) => `Луч маяка · ${l}`,
     eventDesc: () => "Глобальный множитель монет",
@@ -133,10 +135,10 @@ export const FORGE_NODES = [
   },
   {
     id: "portal",
+    branch: "income",
+    requires: [["beacon", 4]],
     name: "Портал биомов",
     icon: "◉",
-    col: 2,
-    row: 5,
     max: 8,
     eventTitle: (l) => `Сдвиг мира · ${l}`,
     eventDesc: () => "Фон и блоки меняют биом",
@@ -147,10 +149,10 @@ export const FORGE_NODES = [
   },
   {
     id: "overdrive",
+    branch: "final",
+    requires: [["conveyor", 5], ["tnt", 4], ["portal", 4]],
     name: "OVERDRIVE",
     icon: "◆",
-    col: 1,
-    row: 6,
     max: 5,
     eventTitle: (l) => `БЕЗУМИЕ · ${l}`,
     eventDesc: () => "Хроматика, хаос, бог-режим",
@@ -171,62 +173,47 @@ export function isOverdriveMaxed() {
   return !!node && lvl("overdrive") >= node.max;
 }
 
-export function prerequisiteNode(node) {
-  const idx = FORGE_NODES.findIndex((n) => n.id === node.id);
-  if (idx <= 0) return null;
-  return FORGE_NODES[idx - 1];
+const NODE_BY_ID = Object.fromEntries(FORGE_NODES.map((n) => [n.id, n]));
+
+export function unmetRequirement(node) {
+  for (const [id, need] of node.requires) {
+    const have = lvl(id);
+    if (have < need) return { node: NODE_BY_ID[id], have, need };
+  }
+  return null;
 }
 
 export function canUnlockNode(node) {
-  const prev = prerequisiteNode(node);
-  if (!prev) return true;
-  return lvl(prev.id) >= prev.max;
+  return unmetRequirement(node) === null;
 }
 
 export function lockedReason(node) {
-  const prev = prerequisiteNode(node);
-  if (!prev || canUnlockNode(node)) return "";
-  return `${prev.name} · MAX`;
+  const unmet = unmetRequirement(node);
+  return unmet ? `${unmet.node.name} ${unmet.have}/${unmet.need}` : "";
 }
 
-function nodeIndex(nodeId) {
-  return FORGE_NODES.findIndex((n) => n.id === nodeId);
-}
-
-export function nodeBaseCost(nodeIndex) {
-  if (nodeIndex <= 0) return FIRST_UPGRADE_COST;
-  const prev = FORGE_NODES[nodeIndex - 1];
-  const lastLevel = prev.max - 1;
-  return Math.floor(upgradeCost(prev.id, lastLevel) * NEXT_NODE_COST_MULT);
-}
-
-export function upgradeCost(nodeId, level) {
-  const idx = nodeIndex(nodeId);
-  if (idx < 0) return Infinity;
-  const base = nodeBaseCost(idx);
-  return Math.floor(base * LEVEL_COST_MULT ** level);
+export function upgradeCost(nodeId) {
+  const node = NODE_BY_ID[nodeId];
+  if (!node) return Infinity;
+  const total = totalForgeLevels();
+  const ramp = Math.min(1, ((total + 1) / EARLY_DISCOUNT_LEVELS) ** EARLY_DISCOUNT_POWER);
+  return Math.max(1, Math.floor(FIRST_UPGRADE_COST * LEVEL_COST_MULT ** total * ramp * (node.costMult ?? 1)));
 }
 
 export function canBuyNode(node) {
-  const level = lvl(node.id);
-  if (level >= node.max) return false;
+  if (lvl(node.id) >= node.max) return false;
   if (!canUnlockNode(node)) return false;
-  return game.coins >= upgradeCost(node.id, level);
+  return game.coins >= upgradeCost(node.id);
 }
 
 export function nextForgeUpgrade() {
   for (const node of FORGE_NODES) {
     const level = lvl(node.id);
-    if (level >= node.max) continue;
-    return { node, level, cost: upgradeCost(node.id, level) };
+    if (level >= node.max || !canUnlockNode(node)) continue;
+    return { node, level, cost: upgradeCost(node.id) };
   }
   const last = FORGE_NODES[FORGE_NODES.length - 1];
-  const level = last.max - 1;
-  return { node: last, level, cost: upgradeCost(last.id, level) };
-}
-
-export function nextUpgradeCost() {
-  return nextForgeUpgrade().cost;
+  return { node: last, level: lvl(last.id), cost: upgradeCost(last.id) };
 }
 
 export function applyMilestones(node, newLevel) {

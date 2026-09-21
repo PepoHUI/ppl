@@ -1,5 +1,3 @@
-// Pure, DOM-free model + generators for the Respackopts tool. Node-testable.
-
 export const DEFAULT_CONF_VER = 13;
 export const OPTION_TYPES = ["boolean", "integer", "number", "string", "enum"];
 

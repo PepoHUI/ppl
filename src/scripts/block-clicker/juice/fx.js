@@ -1,6 +1,7 @@
 import gsap from "gsap";
 import { formatNum } from "../core/economy.js";
 import { escalation } from "../core/progression.js";
+import { anchorRects } from "./layout-cache.js";
 
 const reduced =
   typeof window !== "undefined" &&
@@ -16,54 +17,6 @@ export function pageEntrance(root) {
     duration: 0.6,
     stagger: 0.06,
     ease: "power3.out",
-  });
-}
-
-export function initIdleMotion() {
-  if (reduced) return;
-
-  gsap.to(".bc-bg__orb--a", {
-    x: 30,
-    y: -20,
-    duration: 5,
-    repeat: -1,
-    yoyo: true,
-    ease: "sine.inOut",
-  });
-  gsap.to(".bc-bg__orb--b", {
-    x: -25,
-    y: 25,
-    duration: 6.5,
-    repeat: -1,
-    yoyo: true,
-    ease: "sine.inOut",
-  });
-
-  gsap.to(".bc-hud__pulse", {
-    scale: 1.4,
-    opacity: 0.5,
-    duration: 1.2,
-    repeat: -1,
-    yoyo: true,
-    ease: "sine.inOut",
-  });
-
-  gsap.to(".bc-arena__scan", {
-    yPercent: 120,
-    duration: 3.5,
-    repeat: -1,
-    ease: "none",
-  });
-
-  gsap.utils.toArray(".bc-hud__stat .bc-hud__value").forEach((el, i) => {
-    gsap.to(el, {
-      scale: 1.03,
-      duration: 1.8 + i * 0.12,
-      repeat: -1,
-      yoyo: true,
-      ease: "sine.inOut",
-      transformOrigin: "left center",
-    });
   });
 }
 
@@ -183,8 +136,7 @@ export function spawnFloat(layer, text, kind = "dmg", anchor = null) {
   const esc = escalation();
 
   if (anchor) {
-    const ar = anchor.getBoundingClientRect();
-    const lr = layer.getBoundingClientRect();
+    const { ar, lr } = anchorRects(anchor, layer);
     const x = ar.left - lr.left + ar.width * (0.35 + Math.random() * 0.3);
     const y = ar.top - lr.top + ar.height * (0.15 + Math.random() * 0.25);
     el.style.left = `${x}px`;
@@ -249,8 +201,10 @@ export function celebrateNode(card) {
     .to(card, { scale: 1, duration: 0.5, ease: "elastic.out(1, 0.45)" });
 }
 
-export function showBanner(banner, title, sub) {
+export function showBanner(banner, title, sub, soft = false) {
   if (!banner) return;
+  if (soft && !banner.hidden) return;
+  gsap.killTweensOf(banner);
   banner.hidden = false;
   banner.innerHTML = `<strong>${title}</strong><span>${sub}</span>`;
   if (reduced) {
